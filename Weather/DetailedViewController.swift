@@ -11,7 +11,7 @@ class DetailedViewController: UIViewController {
     
     let userDefaults = UserDefaults.standard
     var weather: WeatherList?
-    var city: City? 
+    var city: City?
     
     @IBOutlet var cityName: UILabel!
     @IBOutlet var time: UILabel!

@@ -1,0 +1,20 @@
+//
+//  CachedWind.swift
+//  Weather
+//
+//  Created by Mihail on 11.06.2021.
+//
+
+import Foundation
+import RealmSwift
+
+@objcMembers class CachedWind: Object {
+    dynamic var id: String = UUID().uuidString
+    dynamic var speed = RealmOptional<Double>()
+    dynamic var deg = RealmOptional<Int>()
+    dynamic var gust = RealmOptional<Double>()
+
+    override static func primaryKey() -> String? {
+        return "id"
+    }
+}
