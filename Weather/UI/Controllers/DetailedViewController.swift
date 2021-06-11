@@ -37,6 +37,7 @@ class DetailedViewController: UIViewController {
     }
 
     private func setupView() {
+        navigationController?.setNavigationBarHidden(false, animated: false)
         back.layer.cornerRadius = 5
         back.backgroundColor = UIColor(rgb: 0xE9EEFA)
         

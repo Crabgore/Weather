@@ -38,6 +38,7 @@ class WeatherViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        navigationController?.setNavigationBarHidden(false, animated: false)
         changer?.changeTitle(title: response?.city?.name ?? "")
         setTemp()
         setSpeed()

@@ -35,6 +35,7 @@ class OnboardViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     private func setupView() {
+        navigationController?.setNavigationBarHidden(true, animated: false)
         view.backgroundColor = .blue
         useBtn.layer.cornerRadius = 5
         titleText.text = "Разрешить приложению  Weather использовать данные о местоположении вашего устройства\n\nЧтобы получить более точные прогнозы погоды во время движения или путешествия\n\nВы можете изменить свой выбор в любое время из меню приложения"

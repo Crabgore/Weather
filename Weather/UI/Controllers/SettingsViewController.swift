@@ -51,6 +51,7 @@ class SettingsViewController: UIViewController {
     }
     
     private func setupViews() {
+        navigationController?.setNavigationBarHidden(true, animated: false)
         view.backgroundColor = .blue
         sView.layer.cornerRadius = 5
         setBtn.layer.cornerRadius = 5
