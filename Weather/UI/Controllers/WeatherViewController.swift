@@ -50,12 +50,7 @@ class WeatherViewController: UIViewController {
         back.layer.cornerRadius = 5
         
         if cityName == nil {
-            let city = userDefaults.string(forKey: CITY)
-            if city != nil {
-                showInfo(city: city)
-            } else {
-                return
-            }
+            return
         } else {
             showInfo(city: cityName)
         }
@@ -80,9 +75,7 @@ class WeatherViewController: UIViewController {
         let saveAction = UIAlertAction(title: "Сохранить", style: UIAlertAction.Style.default, handler: { alert -> Void in
             let firstTextField = alertController.textFields![0] as UITextField
             if firstTextField.text != nil && firstTextField.text != "" {
-                NetworkService.infoDataTask(city: firstTextField.text!, block: self.setInfoFromApi)
-                self.addView.isHidden = true
-                self.userDefaults.setValue(firstTextField.text!, forKey: CITY)
+                self.cityAdded(city: firstTextField.text!)
             }
         })
         
@@ -141,6 +134,7 @@ class WeatherViewController: UIViewController {
     private func setupCollection() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
+//        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         collection.collectionViewLayout = layout
         collection.dataSource = self
         collection.delegate = self
@@ -192,7 +186,20 @@ class WeatherViewController: UIViewController {
             currentTemp.text = String(format: "%.0f", response?.list?[0].main?.temp ?? 0) + "°"
         }
     }
-
+    
+    private func cityAdded(city: String) {
+        NetworkService.infoDataTask(city: city, block: self.setInfoFromApi)
+        self.addView.isHidden = true
+        var cities = userDefaults.stringArray(forKey: CITY) ?? [String]()
+        cities.append(city)
+        self.userDefaults.setValue(cities, forKey: CITY)
+    }
+    
+    func setNewCity(newCityName: String) {
+        if cityName == nil {
+            cityAdded(city: newCityName)
+        }
+    }
 }
 
 extension WeatherViewController: UICollectionViewDataSource {

@@ -14,22 +14,32 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
     private let inspector = Inspector()
     private let locationManager = CLLocationManager()
     private(set) lazy var orderedViewControllers: [UIViewController] = {
-        return [self.newColoredViewController(), self.newColoredViewController()]
+        var controllers = [UIViewController]()
+        controllers.append(self.newViewController())
+        
+        var cities = userDefaults.stringArray(forKey: CITY) ?? [String]()
+        if cities.count > 0 {
+            for city in cities {
+                controllers.append(self.newViewController(cityName: city))
+            }
+        }
+        
+        return controllers
     }()
     
-    private func newColoredViewController() -> UIViewController {
+    private func newViewController(cityName: String? = nil) -> UIViewController {
         let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "WeatherVC")
         (vc as! WeatherViewController).inspector = self.inspector
         (vc as! WeatherViewController).changer = self
+        if cityName != nil {
+            (vc as! WeatherViewController).cityName = cityName
+        }
         return vc
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
         checkPermission()
     }
     
@@ -49,27 +59,13 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
         navigationItem.rightBarButtonItem = locationBtn
     }
     
-    @objc private func locationTapped() {
-        navigationController?.pushViewController(UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "OnboardingVC"), animated: true)
-    }
-    
-    @objc private func menuTapped() {
-        navigationController?.pushViewController(UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SettingsVC"), animated: true)
-    }
-    
     private func checkPermission() {
         switch self.locationManager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
-            if orderedViewControllers.count == 1 {
-                orderedViewControllers.insert(newColoredViewController(), at: 0)
-            }
             locationManager.requestLocation()
         case .notDetermined:
             let permission = userDefaults.bool(forKey: IS_PERMITTED)
             if permission {
-                if orderedViewControllers.count > 1 {
-                    orderedViewControllers.remove(at: 1)
-                }
                 if let firstViewController = self.orderedViewControllers.first {
                     self.setViewControllers([firstViewController], direction: .forward, animated: true, completion: nil)
                 }
@@ -77,7 +73,9 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
                 navigationController?.pushViewController(UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "OnboardingVC"), animated: true)
             }
         case .restricted, .denied:
-            print("location denied")
+            if let firstViewController = self.orderedViewControllers.first {
+                self.setViewControllers([firstViewController], direction: .forward, animated: true, completion: nil)
+            }
         }
     }
     
@@ -111,6 +109,37 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
     
     func changeTitle(title: String) {
         self.navigationItem.title = title
+    }
+    
+    @objc private func locationTapped() {
+        let alertController = UIAlertController(title: "Введите название города на английском", message: "", preferredStyle: UIAlertController.Style.alert)
+        alertController.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = "Введите название города на английском"
+        }
+        let saveAction = UIAlertAction(title: "Сохранить", style: UIAlertAction.Style.default, handler: { alert -> Void in
+            let firstTextField = alertController.textFields![0] as UITextField
+            if firstTextField.text != nil && firstTextField.text != "" {
+                self.orderedViewControllers.append(self.newViewController())
+                if let firstViewController = self.orderedViewControllers.last {
+                    self.setViewControllers([firstViewController],
+                                            direction: .forward,
+                                            animated: true,
+                                            completion: nil)
+                    (firstViewController as! WeatherViewController).setNewCity(newCityName: firstTextField.text!)
+                }
+            }
+        })
+        
+        alertController.addAction(saveAction)
+        
+        self.present(alertController, animated: true, completion: nil)
+        
+        
+//        navigationController?.pushViewController(UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "OnboardingVC"), animated: true)
+    }
+    
+    @objc private func menuTapped() {
+        navigationController?.pushViewController(UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SettingsVC"), animated: true)
     }
 }
 
