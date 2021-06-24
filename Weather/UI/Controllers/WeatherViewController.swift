@@ -30,6 +30,7 @@ class WeatherViewController: UIViewController {
     @IBOutlet var back: UIView!
     @IBOutlet var tableView: UITableView!
     @IBOutlet var addView: UIView!
+    @IBOutlet var HourlyDetails: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,6 +55,19 @@ class WeatherViewController: UIViewController {
         } else {
             showInfo(city: cityName)
         }
+        
+        setupViews()
+    }
+    
+    private func setupViews() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toHourlyDetails))
+        HourlyDetails.isUserInteractionEnabled = true
+        HourlyDetails.addGestureRecognizer(tapGesture)
+        
+        let attributedString = NSMutableAttributedString.init(string: "Подробнее на 24 часа")
+        attributedString.addAttribute(NSAttributedString.Key.underlineStyle, value: 1, range:
+            NSRange.init(location: 0, length: attributedString.length));
+        HourlyDetails.attributedText = attributedString
     }
     
     private func showInfo(city: String?) {
@@ -134,7 +148,6 @@ class WeatherViewController: UIViewController {
     private func setupCollection() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-//        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         collection.collectionViewLayout = layout
         collection.dataSource = self
         collection.delegate = self
@@ -144,7 +157,7 @@ class WeatherViewController: UIViewController {
     private func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = 70
+        tableView.rowHeight = 60
         tableView.register(
             ForecastTableViewCell.self,
             forCellReuseIdentifier: String(describing: ForecastTableViewCell.self)
@@ -161,6 +174,9 @@ class WeatherViewController: UIViewController {
         
         sunrise.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.city?.sunrise ?? 0)))
         sunset.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.city?.sunset ?? 0)))
+        
+        dayTimePeriodFormatter.dateFormat = "EE, dd MMMM"
+        overview.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?[0].dt ?? 0)))
     }
     
     private func setSpeed() {
@@ -200,6 +216,12 @@ class WeatherViewController: UIViewController {
             cityAdded(city: newCityName)
         }
     }
+    
+    @objc private func toHourlyDetails() {
+        let vc = HourlyViewController()
+        vc.list = response?.list
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
 
 extension WeatherViewController: UICollectionViewDataSource {
@@ -223,11 +245,7 @@ extension WeatherViewController: UICollectionViewDelegateFlowLayout {
     var inset: CGFloat { return 2 }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: (collectionView.frame.width - inset * 4) / 7, height: (collectionView.frame.width - inset * 4) / 5)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return CGFloat.greatestFiniteMagnitude
+        return CGSize(width: 50, height: 100)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
@@ -237,6 +255,13 @@ extension WeatherViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let forecastCell = cell as? ForecastCollectionViewCell else { return }
         forecastCell.weather = response?.list?[indexPath.item]
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DetailedVC")
+        (vc as! DetailedViewController).city = response?.city
+        (vc as! DetailedViewController).weather = response?.list?[indexPath.item]
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
