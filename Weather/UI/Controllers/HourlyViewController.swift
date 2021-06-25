@@ -9,9 +9,52 @@ import UIKit
 
 class HourlyViewController: UIViewController {
     
+    let userDefaults = UserDefaults.standard
     var list: [WeatherList]?
     var myList = [WeatherList]()
+    var previousTemp = 0.0
+    var previousRain = 0.0
+    var previousTempPoint = CGPoint(x: 0, y: 0)
+    var previousRainPoint = CGPoint(x: 0, y: 0)
+    var myX = 10
+    var counter = 0
     private let tableView = UITableView(frame: .zero, style: .plain)
+    
+    private let tempGraphView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(rgb: 0xE9EEFA)
+        view.layer.cornerRadius = 5
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let rainGraphView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(rgb: 0xE9EEFA)
+        view.layer.cornerRadius = 5
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let temp: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 1
+        label.text = "График температуры"
+        label.textAlignment = .left
+        label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let rain: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 1
+        label.text = "График вероятности осадков"
+        label.textAlignment = .left
+        label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,6 +62,8 @@ class HourlyViewController: UIViewController {
         makeList()
         setupTableView()
         setupViews()
+        makeTempGraph()
+        makeRainGraph()
     }
     
     private func setupTableView() {
@@ -33,13 +78,31 @@ class HourlyViewController: UIViewController {
     }
 
     private func setupViews() {
-        view.addSubview(tableView)
+        view.backgroundColor = .white
+        view.addSubviews(temp, tempGraphView, rain, rainGraphView, tableView)
+        counter = Int((view.viewWidth - 10) / 9)
         
         let constraints = [
-            tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 5),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 5),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -5),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5)
+            temp.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 5),
+            temp.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
+            
+            tempGraphView.topAnchor.constraint(equalTo: temp.bottomAnchor, constant: 5),
+            tempGraphView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
+            tempGraphView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
+            tempGraphView.heightAnchor.constraint(equalToConstant: 120),
+            
+            rain.topAnchor.constraint(equalTo: tempGraphView.bottomAnchor, constant: 20),
+            rain.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
+            
+            rainGraphView.topAnchor.constraint(equalTo: rain.bottomAnchor, constant: 5),
+            rainGraphView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
+            rainGraphView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
+            rainGraphView.heightAnchor.constraint(equalToConstant: 120),
+            
+            tableView.topAnchor.constraint(equalTo: rainGraphView.bottomAnchor, constant: 20),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -5)
         ]
         
         NSLayoutConstraint.activate(constraints)
@@ -50,6 +113,156 @@ class HourlyViewController: UIViewController {
         for i in 0...8 {
             myList.append((list?[i])!)
         }
+    }
+
+    private func makeTempGraph() {
+        let path = UIBezierPath()
+        
+        let point = makeFirstPoint()
+        let temp = (myList[0].main?.temp)!
+//        if temp > 0 {
+//            point = CGPoint(x: 10, y: 70)
+//        } else {
+//            point = CGPoint(x: 10, y: 30)
+//        }
+        
+        path.move(to: point)
+        
+        recalculateTempPoints(point: point, temp: temp)
+        setTime(x: Int(point.x), view: tempGraphView, time: myList[0].dt!)
+        
+        for i in 1..<myList.count {
+            path.addLine(to: makeDot(x: myX, temp: (myList[i].main?.temp)!, time: myList[i].dt!))
+        }
+        
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.path = path.cgPath
+        shapeLayer.strokeColor = UIColor.blue.cgColor
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.lineWidth = 1
+
+        tempGraphView.layer.addSublayer(shapeLayer)
+        
+        myX = 10
+    }
+    
+    private func makeRainGraph() {
+        let path = UIBezierPath()
+        
+        let point = CGPoint(x: 10, y: 50)
+        let rain = myList[0].pop ?? 0
+        
+        path.move(to: point)
+        
+        recalculateRainPoints(point: point, rain: rain)
+        setTime(x: Int(point.x), view: rainGraphView, time: myList[0].dt!)
+        
+        for i in 1..<myList.count {
+            path.addLine(to: makeRainDot(x: myX, rain: myList[i].pop ?? 0, time: myList[i].dt!))
+        }
+        
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.path = path.cgPath
+        shapeLayer.strokeColor = UIColor.blue.cgColor
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.lineWidth = 1
+
+        rainGraphView.layer.addSublayer(shapeLayer)
+    }
+    
+    private func makeDot(x: Int, temp: Double, time: CLong) -> CGPoint {
+        var result = CGPoint(x: 0, y: 0)
+        if temp > previousTemp {
+            let y = Int(Double(Int(previousTempPoint.y)) - ((temp - previousTemp) * 10))
+            result = CGPoint(x: x, y: y)
+        } else {
+            let y = Int(Double(Int(previousTempPoint.y)) + ((previousTemp - temp) * 10))
+            result = CGPoint(x: x, y: y)
+        }
+        
+        recalculateTempPoints(point: result, temp: temp)
+        setTime(x: Int(result.x), view: tempGraphView, time: time)
+        
+        return result
+    }
+    
+    private func makeRainDot(x: Int, rain: Double, time: CLong) -> CGPoint {
+        var result = CGPoint(x: 0, y: 0)
+        if rain > previousRain {
+            let y = Int(Double(Int(previousRainPoint.y)) - ((rain - previousRain) * 10))
+            result = CGPoint(x: x, y: y)
+        } else {
+            let y = Int(Double(Int(previousRainPoint.y)) + ((previousRain - rain) * 10))
+            result = CGPoint(x: x, y: y)
+        }
+        
+        recalculateRainPoints(point: result, rain: rain)
+        setTime(x: Int(result.x), view: rainGraphView, time: time)
+        
+        return result
+    }
+    
+    private func recalculateTempPoints(point: CGPoint, temp: Double) {
+        previousTempPoint = point
+        previousTemp = temp
+        myX += counter
+        
+        let label = UILabel()
+        label.text = String(Int(temp)) + "°"
+        label.frame = CGRect(x: point.x, y: point.y, width: 30, height: 25)
+        tempGraphView.addSubview(label)
+    }
+    
+    private func recalculateRainPoints(point: CGPoint, rain: Double) {
+        previousRainPoint = point
+        previousRain = rain
+        myX += counter
+        
+        let label = UILabel()
+        label.text = String(format: "%.0f", rain * 100) + "%"
+        label.frame = CGRect(x: point.x, y: point.y, width: 30, height: 25)
+        rainGraphView.addSubview(label)
+    }
+    
+    private func setTime(x: Int, view: UIView, time: CLong) {
+        let timeConfig = userDefaults.integer(forKey: TIME)
+        let dayTimePeriodFormatter = DateFormatter()
+        if timeConfig == 2 {
+            dayTimePeriodFormatter.dateFormat = "hh:mm"
+        } else {
+            dayTimePeriodFormatter.dateFormat = "HH:mm"
+        }
+        
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 9)
+        label.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(time)))
+        label.frame = CGRect(x: x, y: 120, width: 30, height: 25)
+        view.addSubview(label)
+    }
+    
+    private func makeFirstPoint() -> CGPoint {
+        var hottest = -236.0
+        var coldest = 1000.0
+        
+        for i in 0..<myList.count {
+            if (myList[i].main?.temp)! > hottest {
+                hottest = (myList[i].main?.temp)!
+            }
+            if (myList[i].main?.temp)! < coldest {
+                coldest = (myList[i].main?.temp)!
+            }
+        }
+        
+        let diff = Int(((hottest - coldest) * 10) / 2)
+        var result = CGPoint(x: 0, y: 0)
+        
+        if (hottest - (myList[0].main?.temp)!) > ((myList[0].main?.temp)! - coldest) {
+            result = CGPoint(x: 10, y: 60+diff)
+        } else {
+            result = CGPoint(x: 10, y: 60-diff)
+        }
+        
+        return result
     }
 
 }
@@ -67,6 +280,15 @@ extension HourlyViewController: UITableViewDataSource {
         let cell: HourlyTableViewCell = tableView.dequeueReusableCell(withIdentifier: String(describing: HourlyTableViewCell.self), for: indexPath) as! HourlyTableViewCell
         cell.weather = myList[indexPath.row]
         return cell
-        
+    }
+}
+
+extension UIView {
+    public var viewWidth: CGFloat {
+        return self.frame.size.width
+    }
+
+    public var viewHeight: CGFloat {
+        return self.frame.size.height
     }
 }

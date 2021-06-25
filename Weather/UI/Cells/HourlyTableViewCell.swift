@@ -19,7 +19,7 @@ class HourlyTableViewCell: UITableViewCell {
             setTemp()
             setSpeed()
             cloudsValue.text = String(format: "%.0f", weather?.clouds?.all ?? 0) + "%"
-            rainValue.text = String(weather?.rain?.the3H ?? 0) + "%"
+            rainValue.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
         }
     }
     
@@ -232,6 +232,7 @@ class HourlyTableViewCell: UITableViewCell {
     
     private func setDate() {
         dayTimePeriodFormatter.dateFormat = "EE, dd/MM"
+        dayTimePeriodFormatter.locale = Locale(identifier: "ru_RU")
         date.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
     }
     

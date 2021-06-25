@@ -17,7 +17,7 @@ class ForecastTableViewCell: UITableViewCell {
             dayTimePeriodFormatter.dateFormat = "dd/MM"
             date.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
             rainPossibility.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
-            overview.text = weather?.weather?[0].weatherDescription
+            overview.text = properDesc(desc: weather?.weather?[0].weatherDescription ?? "")
             setTemp()
         }
     }

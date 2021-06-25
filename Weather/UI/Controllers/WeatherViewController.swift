@@ -49,14 +49,13 @@ class WeatherViewController: UIViewController {
     
     private func startApp() {
         back.layer.cornerRadius = 5
+        setupViews()
         
         if cityName == nil {
             return
         } else {
             showInfo(city: cityName)
         }
-        
-        setupViews()
     }
     
     private func setupViews() {
@@ -105,7 +104,7 @@ class WeatherViewController: UIViewController {
         makeList()
         
         setTemp()
-        desc.text = result.list?[0].weather?[0].weatherDescription
+        desc.text = properDesc(desc: result.list?[0].weather?[0].weatherDescription ?? "")
         clouds.text = String(format: "%.0f", result.list?[0].clouds?.all ?? 0)
         humidity.text = String(result.list?[0].main?.humidity ?? 0) + "%"
         setSpeed()
@@ -176,6 +175,7 @@ class WeatherViewController: UIViewController {
         sunset.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.city?.sunset ?? 0)))
         
         dayTimePeriodFormatter.dateFormat = "EE, dd MMMM"
+        dayTimePeriodFormatter.locale = Locale(identifier: "ru_RU")
         overview.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?[0].dt ?? 0)))
     }
     

@@ -23,6 +23,7 @@
 		871001B4266F9EC8001200C3 /* MyLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871001B3266F9EC8001200C3 /* MyLocationManager.swift */; };
 		87208C7C268484BF009E17F1 /* HourlyTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208C7B268484BF009E17F1 /* HourlyTableViewCell.swift */; };
 		87208C7F268490DF009E17F1 /* HourlyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208C7E268490DF009E17F1 /* HourlyViewController.swift */; };
+		87208C822685FEFC009E17F1 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208C812685FEFC009E17F1 /* Utils.swift */; };
 		8776BECB266FB0DD00297943 /* Inspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8776BECA266FB0DD00297943 /* Inspector.swift */; };
 		8776BECE2670D29A00297943 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8776BECD2670D29A00297943 /* SettingsViewController.swift */; };
 		8776BED12670D8FA00297943 /* Consts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8776BED02670D8FA00297943 /* Consts.swift */; };
@@ -58,6 +59,7 @@
 		871001B3266F9EC8001200C3 /* MyLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLocationManager.swift; sourceTree = "<group>"; };
 		87208C7B268484BF009E17F1 /* HourlyTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyTableViewCell.swift; sourceTree = "<group>"; };
 		87208C7E268490DF009E17F1 /* HourlyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyViewController.swift; sourceTree = "<group>"; };
+		87208C812685FEFC009E17F1 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		8776BECA266FB0DD00297943 /* Inspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inspector.swift; sourceTree = "<group>"; };
 		8776BECD2670D29A00297943 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		8776BED02670D8FA00297943 /* Consts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Consts.swift; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 			children = (
 				871001B3266F9EC8001200C3 /* MyLocationManager.swift */,
 				8776BECA266FB0DD00297943 /* Inspector.swift */,
+				87208C812685FEFC009E17F1 /* Utils.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -324,6 +327,7 @@
 			files = (
 				871001B1266F9525001200C3 /* OnboardViewController.swift in Sources */,
 				8776BEEB267372CC00297943 /* CachedCoord.swift in Sources */,
+				87208C822685FEFC009E17F1 /* Utils.swift in Sources */,
 				87208C7C268484BF009E17F1 /* HourlyTableViewCell.swift in Sources */,
 				8776BEDA267111D400297943 /* CachedWeather.swift in Sources */,
 				8776BEF42673733300297943 /* CachedClouds.swift in Sources */,
