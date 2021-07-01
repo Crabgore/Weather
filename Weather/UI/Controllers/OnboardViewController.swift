@@ -24,7 +24,7 @@ class OnboardViewController: UIViewController, CLLocationManagerDelegate {
     
     @IBAction func noAction(_ sender: Any) {
         userDefaults.setValue(true, forKey: IS_PERMITTED)
-        navigationController?.popToRootViewController(animated: true)
+        popBack()
     }
     
     override func viewDidLoad() {
