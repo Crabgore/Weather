@@ -47,13 +47,13 @@ class DetailedViewController: UIViewController {
         setTemp(temperature: weather?.main?.temp ?? 0, view: temp)
         setTemp(temperature: weather?.main?.feelsLike ?? 0, view: feelsLike)
         setSpeed()
-        rain.text = String(format: "%.0f", weather?.rain?.the3H ?? 0) + "%"
-        clouds.text = String(format: "%.0f", weather?.clouds?.all ?? 0) + "%"
+        rain.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
+        clouds.text = String(weather?.clouds?.all ?? 0) + "%"
         visibility.text = String(weather?.visibility ?? 0)
         humidity.text = String(weather?.main?.humidity ?? 0) + "%"
         seaLevel.text = String(weather?.main?.seaLevel ?? 0) + " hPa"
         grndLevel.text = String(weather?.main?.grndLevel ?? 0) + " hPa"
-        overView.text = weather?.weather?[0].weatherDescription
+        overView.text = properDesc(desc: weather?.weather?[0].weatherDescription ?? "")
     }
     
     private func setTime() {

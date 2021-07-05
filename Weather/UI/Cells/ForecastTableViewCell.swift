@@ -120,9 +120,17 @@ class ForecastTableViewCell: UITableViewCell {
         if tempConfig == 1 {
             let minTemp = ((weather?.main?.tempMin ?? 0) * 1.8) + 32
             let maxTemp = ((weather?.main?.tempMax ?? 0) * 1.8) + 32
-            temp.text = String(format: "%.0f", minTemp) + "°-" + String(format: "%.0f", maxTemp) + "°"
+            if String(format: "%.0f", minTemp) == String(format: "%.0f", maxTemp) {
+                temp.text = String(format: "%.0f", minTemp) + "°"
+            } else {
+                temp.text = String(format: "%.0f", minTemp) + "°-" + String(format: "%.0f", maxTemp) + "°"
+            }
         } else {
-            temp.text = String(format: "%.0f", weather?.main?.tempMin ?? 0) + "°-" + String(format: "%.0f", weather?.main?.tempMax ?? 0) + "°"
+            if String(format: "%.0f", weather?.main?.tempMin ?? 0) == String(format: "%.0f", weather?.main?.tempMax ?? 0) {
+                temp.text = String(format: "%.0f", weather?.main?.tempMin ?? 0) + "°"
+            } else {
+                temp.text = String(format: "%.0f", weather?.main?.tempMin ?? 0) + "°-" + String(format: "%.0f", weather?.main?.tempMax ?? 0) + "°"
+            }
         }
     }
 }

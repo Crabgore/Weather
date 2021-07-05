@@ -105,7 +105,7 @@ class WeatherViewController: UIViewController {
         
         setTemp()
         desc.text = properDesc(desc: result.list?[0].weather?[0].weatherDescription ?? "")
-        clouds.text = String(format: "%.0f", result.list?[0].clouds?.all ?? 0)
+        clouds.text = String(result.list?[0].clouds?.all ?? 0) + "%"
         humidity.text = String(result.list?[0].main?.humidity ?? 0) + "%"
         setSpeed()
         
@@ -195,10 +195,18 @@ class WeatherViewController: UIViewController {
             let minTemp = ((response?.list?[0].main?.tempMin ?? 0) * 1.8) + 32
             let maxTemp = ((response?.list?[0].main?.tempMax ?? 0) * 1.8) + 32
             let temp = ((response?.list?[0].main?.temp ?? 0) * 1.8) + 32
-            minMax.text = String(format: "%.0f", minTemp) + "°/" + String(format: "%.0f", maxTemp) + "°"
+            if String(format: "%.0f", minTemp) == String(format: "%.0f", maxTemp) {
+                minMax.text = String(format: "%.0f", minTemp) + "°"
+            } else {
+                minMax.text = String(format: "%.0f", minTemp) + "°/" + String(format: "%.0f", maxTemp) + "°"
+            }
             currentTemp.text = String(format: "%.0f", temp) + "°"
         } else {
-            minMax.text = String(format: "%.0f", response?.list?[0].main?.tempMin ?? 0) + "°/" + String(format: "%.0f", response?.list?[0].main?.tempMax ?? 0) + "°"
+            if String(format: "%.0f", response?.list?[0].main?.tempMin ?? 0) == String(format: "%.0f", response?.list?[0].main?.tempMax ?? 0) {
+                minMax.text = String(format: "%.0f", response?.list?[0].main?.tempMin ?? 0) + "°"
+            } else {
+                minMax.text = String(format: "%.0f", response?.list?[0].main?.tempMin ?? 0) + "°/" + String(format: "%.0f", response?.list?[0].main?.tempMax ?? 0) + "°"
+            }
             currentTemp.text = String(format: "%.0f", response?.list?[0].main?.temp ?? 0) + "°"
         }
     }

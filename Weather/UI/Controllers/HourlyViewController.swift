@@ -18,6 +18,7 @@ class HourlyViewController: UIViewController {
     var previousRainPoint = CGPoint(x: 0, y: 0)
     var myX = 10
     var counter = 0
+    var implementer = 10
     private let tableView = UITableView(frame: .zero, style: .plain)
     
     private let tempGraphView: UIView = {
@@ -118,6 +119,7 @@ class HourlyViewController: UIViewController {
     private func makeTempGraph() {
         let path = UIBezierPath()
         
+//        let point = makeFirstPoint()
         let point = makeFirstPoint()
         let temp = (myList[0].main?.temp)!
 //        if temp > 0 {
@@ -173,10 +175,10 @@ class HourlyViewController: UIViewController {
     private func makeDot(x: Int, temp: Double, time: CLong) -> CGPoint {
         var result = CGPoint(x: 0, y: 0)
         if temp > previousTemp {
-            let y = Int(Double(Int(previousTempPoint.y)) - ((temp - previousTemp) * 10))
+            let y = Int(Double(Int(previousTempPoint.y)) - ((temp - previousTemp) * 2))
             result = CGPoint(x: x, y: y)
         } else {
-            let y = Int(Double(Int(previousTempPoint.y)) + ((previousTemp - temp) * 10))
+            let y = Int(Double(Int(previousTempPoint.y)) + ((previousTemp - temp) * 2))
             result = CGPoint(x: x, y: y)
         }
         
@@ -209,8 +211,15 @@ class HourlyViewController: UIViewController {
         
         let label = UILabel()
         label.text = String(Int(temp)) + "°"
+        label.font = UIFont.systemFont(ofSize: 14)
         label.frame = CGRect(x: point.x, y: point.y, width: 30, height: 25)
         tempGraphView.addSubview(label)
+        
+        let firstDotView = UIView()
+        firstDotView.frame = CGRect(x: point.x-5, y: point.y-5, width: 10, height: 10)
+        firstDotView.backgroundColor = .blue
+        firstDotView.layer.cornerRadius = 10
+        tempGraphView.addSubview(firstDotView)
     }
     
     private func recalculateRainPoints(point: CGPoint, rain: Double) {
@@ -220,8 +229,15 @@ class HourlyViewController: UIViewController {
         
         let label = UILabel()
         label.text = String(format: "%.0f", rain * 100) + "%"
-        label.frame = CGRect(x: point.x, y: point.y, width: 30, height: 25)
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.frame = CGRect(x: point.x, y: point.y, width: 50, height: 25)
         rainGraphView.addSubview(label)
+        
+        let firstDotView = UIView()
+        firstDotView.frame = CGRect(x: point.x-5, y: point.y-5, width: 10, height: 10)
+        firstDotView.backgroundColor = .blue
+        firstDotView.layer.cornerRadius = 10
+        rainGraphView.addSubview(firstDotView)
     }
     
     private func setTime(x: Int, view: UIView, time: CLong) {
@@ -253,13 +269,11 @@ class HourlyViewController: UIViewController {
             }
         }
         
-        let diff = Int(((hottest - coldest) * 10) / 2)
         var result = CGPoint(x: 0, y: 0)
-        
-        if (hottest - (myList[0].main?.temp)!) > ((myList[0].main?.temp)! - coldest) {
-            result = CGPoint(x: 10, y: 60+diff)
+        if hottest > 0 && coldest > 0 {
+            result = CGPoint(x: 10, y: 75)
         } else {
-            result = CGPoint(x: 10, y: 60-diff)
+            result = CGPoint(x: 10, y: 25)
         }
         
         return result

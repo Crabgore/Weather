@@ -18,7 +18,7 @@ class HourlyTableViewCell: UITableViewCell {
             setTime()
             setTemp()
             setSpeed()
-            cloudsValue.text = String(format: "%.0f", weather?.clouds?.all ?? 0) + "%"
+            cloudsValue.text = String(weather?.clouds?.all ?? 0) + "%"
             rainValue.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
         }
     }

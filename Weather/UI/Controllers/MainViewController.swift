@@ -40,10 +40,15 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        if orderedViewControllers.count > 1 {
+            checkPermission()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        checkPermission()
+        if orderedViewControllers.count <= 1 {
+            checkPermission()
+        }
     }
     
     private func setupView() {
