@@ -9,9 +9,14 @@ import Foundation
 import RealmSwift
 
 class Inspector: RealmInspector {
-    
-    private var realm: Realm? {
+   private var realm: Realm? {
         return try? Realm()
+    }
+    
+    func clear() {
+        try! realm?.write {
+            realm?.deleteAll()
+        }
     }
     
     func saveWeather(weather: Weather, id: String) {

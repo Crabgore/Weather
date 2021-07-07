@@ -40,13 +40,11 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        if orderedViewControllers.count > 1 {
-            checkPermission()
-        }
+        checkPermission()
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if orderedViewControllers.count <= 1 {
+        if !isAppAlreadyLaunchedOnce() {
             checkPermission()
         }
     }
@@ -141,14 +139,20 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
         alertController.addAction(saveAction)
         
         self.present(alertController, animated: true, completion: nil)
-        
-        
-//        navigationController?.pushViewController(UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "OnboardingVC"), animated: true)
     }
     
     @objc private func menuTapped() {
         navigationController?.pushViewController(UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SettingsVC"), animated: true)
     }
+    
+    func isAppAlreadyLaunchedOnce() -> Bool {
+        if userDefaults.bool(forKey: IS_APP_LAUNCHED_ONCE) == false {
+                return true
+            } else {
+                userDefaults.set(false, forKey: IS_APP_LAUNCHED_ONCE)
+                return false
+            }
+        }
 }
 
 // MARK: UIPageViewControllerDataSource
@@ -231,4 +235,5 @@ extension CLLocationManager {
 protocol RealmInspector {
     func saveWeather(weather: Weather, id: String)
     func getWeather(id: String) -> Weather?
+    func clear()
 }

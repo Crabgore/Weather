@@ -43,6 +43,7 @@ class OnboardViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     private func popBack() {
+        userDefaults.set(true, forKey: IS_APP_LAUNCHED_ONCE)
         navigationController?.popToRootViewController(animated: true)
     }
 }
