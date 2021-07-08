@@ -136,6 +136,7 @@ class WeatherViewController: UIViewController {
             dateFormatter.dateFormat = "h:mm a"
             let dateAsString = dateFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?[i].dt ?? 0)))
             let date = dateFormatter.date(from: dateAsString)
+            print("date: \(date!)")
             dateFormatter.dateFormat = "HH"
             let date24 = dateFormatter.string(from: date!)
             if date24 == "02" {
