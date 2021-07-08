@@ -44,6 +44,7 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         if !isAppAlreadyLaunchedOnce() {
             checkPermission()
         }
@@ -235,5 +236,4 @@ extension CLLocationManager {
 protocol RealmInspector {
     func saveWeather(weather: Weather, id: String)
     func getWeather(id: String) -> Weather?
-    func clear()
 }

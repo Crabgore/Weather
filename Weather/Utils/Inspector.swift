@@ -13,12 +13,6 @@ class Inspector: RealmInspector {
         return try? Realm()
     }
     
-    func clear() {
-        try! realm?.write {
-            realm?.deleteAll()
-        }
-    }
-    
     func saveWeather(weather: Weather, id: String) {
         let mWeather = CachedWeather()
         mWeather.id = id

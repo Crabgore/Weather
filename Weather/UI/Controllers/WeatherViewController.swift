@@ -132,15 +132,11 @@ class WeatherViewController: UIViewController {
         
         lists.append((response?.list?[0])!)
         for i in 0..<response!.list!.count {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "h:mm a"
-            let dateAsString = dateFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?[i].dt ?? 0)))
-            let date = dateFormatter.date(from: dateAsString)
-            print("date: \(date!)")
-            dateFormatter.dateFormat = "HH"
-            let date24 = dateFormatter.string(from: date!)
-            if date24 == "02" {
+            let date = response?.list?[i].dtTxt ?? ""
+            print("date: \(date)")
+            if date.contains("00:00:00") {
                 lists.append((response?.list?[i])!)
+                print("added to lists. date: \(date)")
             }
         }
     }
