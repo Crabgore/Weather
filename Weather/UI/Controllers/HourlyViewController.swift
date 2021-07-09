@@ -8,8 +8,7 @@
 import UIKit
 
 class HourlyViewController: UIViewController {
-    
-    let userDefaults = UserDefaults.standard
+    lazy var dateFormatter = DateFormatter()
     var list: [WeatherList]?
     var myList = [WeatherList]()
     var previousTemp = 0.0
@@ -111,30 +110,31 @@ class HourlyViewController: UIViewController {
     
     private func makeList() {
         myList.removeAll()
+        
         for i in 0...8 {
-            myList.append((list?[i])!)
+            if let item = list?[i] {
+                myList.append(item)
+            }
         }
     }
 
     private func makeTempGraph() {
         let path = UIBezierPath()
-        
-//        let point = makeFirstPoint()
         let point = makeFirstPoint()
-        let temp = (myList[0].main?.temp)!
-//        if temp > 0 {
-//            point = CGPoint(x: 10, y: 70)
-//        } else {
-//            point = CGPoint(x: 10, y: 30)
-//        }
         
         path.move(to: point)
         
-        recalculateTempPoints(point: point, temp: temp)
-        setTime(x: Int(point.x), view: tempGraphView, time: myList[0].dt!)
+        if let temp = myList[0].main?.temp {
+            addTempPoint(point: point, temp: temp)
+        }
+        if let time = myList[0].dt {
+            setTime(x: Int(point.x), view: tempGraphView, time: time)
+        }
         
         for i in 1..<myList.count {
-            path.addLine(to: makeDot(x: myX, temp: (myList[i].main?.temp)!, time: myList[i].dt!))
+            if let temp = myList[i].main?.temp, let time = myList[i].dt {
+                path.addLine(to: makeDot(x: myX, temp: temp, time: time))
+            }
         }
         
         let shapeLayer = CAShapeLayer()
@@ -150,17 +150,20 @@ class HourlyViewController: UIViewController {
     
     private func makeRainGraph() {
         let path = UIBezierPath()
-        
         let point = CGPoint(x: 10, y: 50)
         let rain = myList[0].pop ?? 0
         
         path.move(to: point)
         
-        recalculateRainPoints(point: point, rain: rain)
-        setTime(x: Int(point.x), view: rainGraphView, time: myList[0].dt!)
+        addRainPoint(point: point, rain: rain)
+        if let time = myList[0].dt {
+            setTime(x: Int(point.x), view: tempGraphView, time: time)
+        }
         
         for i in 1..<myList.count {
-            path.addLine(to: makeRainDot(x: myX, rain: myList[i].pop ?? 0, time: myList[i].dt!))
+            if let time = myList[i].dt {
+                path.addLine(to: makeRainDot(x: myX, rain: myList[i].pop ?? 0, time: time))
+            }
         }
         
         let shapeLayer = CAShapeLayer()
@@ -182,7 +185,7 @@ class HourlyViewController: UIViewController {
             result = CGPoint(x: x, y: y)
         }
         
-        recalculateTempPoints(point: result, temp: temp)
+        addTempPoint(point: result, temp: temp)
         setTime(x: Int(result.x), view: tempGraphView, time: time)
         
         return result
@@ -198,13 +201,13 @@ class HourlyViewController: UIViewController {
             result = CGPoint(x: x, y: y)
         }
         
-        recalculateRainPoints(point: result, rain: rain)
+        addRainPoint(point: result, rain: rain)
         setTime(x: Int(result.x), view: rainGraphView, time: time)
         
         return result
     }
     
-    private func recalculateTempPoints(point: CGPoint, temp: Double) {
+    private func addTempPoint(point: CGPoint, temp: Double) {
         previousTempPoint = point
         previousTemp = temp
         myX += counter
@@ -215,14 +218,10 @@ class HourlyViewController: UIViewController {
         label.frame = CGRect(x: point.x, y: point.y, width: 30, height: 25)
         tempGraphView.addSubview(label)
         
-        let firstDotView = UIView()
-        firstDotView.frame = CGRect(x: point.x-5, y: point.y-5, width: 10, height: 10)
-        firstDotView.backgroundColor = .blue
-        firstDotView.layer.cornerRadius = 10
-        tempGraphView.addSubview(firstDotView)
+        addDotToGraph(point: point, view: tempGraphView)
     }
     
-    private func recalculateRainPoints(point: CGPoint, rain: Double) {
+    private func addRainPoint(point: CGPoint, rain: Double) {
         previousRainPoint = point
         previousRain = rain
         myX += counter
@@ -233,41 +232,35 @@ class HourlyViewController: UIViewController {
         label.frame = CGRect(x: point.x, y: point.y, width: 50, height: 25)
         rainGraphView.addSubview(label)
         
+        addDotToGraph(point: point, view: rainGraphView)
+    }
+    
+    private func addDotToGraph(point: CGPoint, view: UIView) {
         let firstDotView = UIView()
         firstDotView.frame = CGRect(x: point.x-5, y: point.y-5, width: 10, height: 10)
         firstDotView.backgroundColor = .blue
         firstDotView.layer.cornerRadius = 10
-        rainGraphView.addSubview(firstDotView)
+        view.addSubview(firstDotView)
     }
     
     private func setTime(x: Int, view: UIView, time: CLong) {
-        let timeConfig = userDefaults.integer(forKey: TIME)
-        let dayTimePeriodFormatter = DateFormatter()
-        if timeConfig == 2 {
-            dayTimePeriodFormatter.dateFormat = "hh:mm"
+        if Settings.time == 2 {
+            dateFormatter.dateFormat = "hh:mm"
         } else {
-            dayTimePeriodFormatter.dateFormat = "HH:mm"
+            dateFormatter.dateFormat = "HH:mm"
         }
         
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 9)
-        label.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(time)))
+        label.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(time)))
         label.frame = CGRect(x: x, y: 120, width: 30, height: 25)
         view.addSubview(label)
     }
     
     private func makeFirstPoint() -> CGPoint {
-        var hottest = -236.0
-        var coldest = 1000.0
-        
-        for i in 0..<myList.count {
-            if (myList[i].main?.temp)! > hottest {
-                hottest = (myList[i].main?.temp)!
-            }
-            if (myList[i].main?.temp)! < coldest {
-                coldest = (myList[i].main?.temp)!
-            }
-        }
+        let temps = myList.map { ($0.main?.temp ?? 0.0) }
+        let hottest = temps.max() ?? 1000.0
+        let coldest = temps.min() ?? -236
         
         var result = CGPoint(x: 0, y: 0)
         if hottest > 0 && coldest > 0 {
@@ -278,7 +271,6 @@ class HourlyViewController: UIViewController {
         
         return result
     }
-
 }
 
 extension HourlyViewController: UITableViewDataSource {
@@ -294,15 +286,5 @@ extension HourlyViewController: UITableViewDataSource {
         let cell: HourlyTableViewCell = tableView.dequeueReusableCell(withIdentifier: String(describing: HourlyTableViewCell.self), for: indexPath) as! HourlyTableViewCell
         cell.weather = myList[indexPath.row]
         return cell
-    }
-}
-
-extension UIView {
-    public var viewWidth: CGFloat {
-        return self.frame.size.width
-    }
-
-    public var viewHeight: CGFloat {
-        return self.frame.size.height
     }
 }

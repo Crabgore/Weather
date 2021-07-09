@@ -8,14 +8,12 @@
 import UIKit
 
 class ForecastTableViewCell: UITableViewCell {
-    
-    let dayTimePeriodFormatter = DateFormatter()
-    let userDefaults = UserDefaults.standard
+    lazy var dateFormatter = DateFormatter()
     
     var weather: WeatherList? {
         didSet {
-            dayTimePeriodFormatter.dateFormat = "dd/MM"
-            date.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
+            dateFormatter.dateFormat = "dd/MM"
+            date.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
             rainPossibility.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
             overview.text = properDesc(desc: weather?.weather?[0].weatherDescription ?? "")
             setTemp()
@@ -116,8 +114,7 @@ class ForecastTableViewCell: UITableViewCell {
     }
     
     private func setTemp() {
-        let tempConfig = userDefaults.integer(forKey: TEMP)
-        if tempConfig == 1 {
+        if Settings.temp == 1 {
             let minTemp = ((weather?.main?.tempMin ?? 0) * 1.8) + 32
             let maxTemp = ((weather?.main?.tempMax ?? 0) * 1.8) + 32
             if String(format: "%.0f", minTemp) == String(format: "%.0f", maxTemp) {
@@ -133,22 +130,4 @@ class ForecastTableViewCell: UITableViewCell {
             }
         }
     }
-}
-
-extension UIColor {
-   convenience init(red: Int, green: Int, blue: Int) {
-       assert(red >= 0 && red <= 255, "Invalid red component")
-       assert(green >= 0 && green <= 255, "Invalid green component")
-       assert(blue >= 0 && blue <= 255, "Invalid blue component")
-
-       self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: 1.0)
-   }
-
-   convenience init(rgb: Int) {
-       self.init(
-           red: (rgb >> 16) & 0xFF,
-           green: (rgb >> 8) & 0xFF,
-           blue: rgb & 0xFF
-       )
-   }
 }

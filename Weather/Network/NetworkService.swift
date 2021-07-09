@@ -13,9 +13,11 @@ struct NetworkService {
     
     static func infoDataTask(city: String, block: @escaping (Data) -> Void) {
         let cityName = city.replacingOccurrences(of: " ", with: "+")
-        let url = URL(string: "https://api.openweathermap.org/data/2.5/forecast?q=\(cityName)&units=metric&appid=\(apiKey)")
+        guard let url = URL(string: "https://api.openweathermap.org/data/2.5/forecast?q=\(cityName)&units=metric&appid=\(apiKey)") else {
+            return
+        }
         
-        let task = session.dataTask(with: url!) { data, response, error in
+        let task = session.dataTask(with: url) { data, response, error in
 
             guard error == nil else {
                 print(error.debugDescription)
@@ -38,7 +40,4 @@ struct NetworkService {
         
         task.resume()
     }
-    
-    
-    
 }

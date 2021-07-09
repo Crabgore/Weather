@@ -8,8 +8,7 @@
 import UIKit
 
 class DetailedViewController: UIViewController {
-    
-    let userDefaults = UserDefaults.standard
+    lazy var dateFormatter = DateFormatter()
     var weather: WeatherList?
     var city: City?
     
@@ -47,42 +46,36 @@ class DetailedViewController: UIViewController {
         setTemp(temperature: weather?.main?.temp ?? 0, view: temp)
         setTemp(temperature: weather?.main?.feelsLike ?? 0, view: feelsLike)
         setSpeed()
-        rain.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
-        clouds.text = String(weather?.clouds?.all ?? 0) + "%"
-        visibility.text = String(weather?.visibility ?? 0)
-        humidity.text = String(weather?.main?.humidity ?? 0) + "%"
-        seaLevel.text = String(weather?.main?.seaLevel ?? 0) + " hPa"
-        grndLevel.text = String(weather?.main?.grndLevel ?? 0) + " hPa"
-        overView.text = properDesc(desc: weather?.weather?[0].weatherDescription ?? "")
+        setTextInfo()
     }
     
     private func setTime() {
-        let dayTimePeriodFormatter = DateFormatter()
-        let timeConfig = userDefaults.integer(forKey: TIME)
-        if timeConfig == 2 {
-            dayTimePeriodFormatter.dateFormat = "hh:mm"
+        if Settings.time == 2 {
+            dateFormatter.dateFormat = "hh:mm"
         } else {
-            dayTimePeriodFormatter.dateFormat = "HH:mm"
+            dateFormatter.dateFormat = "HH:mm"
         }
         
-        sunrise.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(city?.sunrise ?? 0)))
-        sunset.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(city?.sunset ?? 0)))
+        sunrise.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(city?.sunrise ?? 0)))
+        sunset.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(city?.sunset ?? 0)))
         
-        dayTimePeriodFormatter.dateFormat = "dd/MM"
-        time.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
+        dateFormatter.dateFormat = "dd/MM"
+        time.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
     }
     
     private func setImage() {
-
         let icon = weather?.weather?[0].icon ?? "10d"
-        let url = URL(string: "http://openweathermap.org/img/wn/\(icon)@2x.png")
-        let data = try? Data(contentsOf: url!)
-        weatherImage.image = UIImage(data: data!)
+        guard let url = URL(string: "http://openweathermap.org/img/wn/\(icon)@2x.png") else {
+            return
+        }
+        guard let data = try? Data(contentsOf: url) else {
+            return
+        }
+        weatherImage.image = UIImage(data: data)
     }
     
     private func setTemp(temperature: Double, view: UILabel) {
-        let tempConfig = userDefaults.integer(forKey: TEMP)
-        if tempConfig == 1 {
+        if Settings.temp == 1 {
             let mTemp = (temperature * 1.8) + 32
             view.text = String(format: "%.0f", mTemp) + "°"
         } else {
@@ -91,12 +84,21 @@ class DetailedViewController: UIViewController {
     }
     
     private func setSpeed() {
-        let timeConfig = userDefaults.integer(forKey: SPEED)
-        if timeConfig == 1 {
+        if Settings.speed == 1 {
             let speed = ((weather?.wind?.speed ?? 0) * 18) / 5
             windSpeed.text = String(format: "%.0f", speed) + " Km/h"
         } else {
             windSpeed.text = String(format: "%.0f", weather?.wind?.speed ?? 0) + " m/s"
         }
+    }
+    
+    private func setTextInfo() {
+        rain.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
+        clouds.text = String(weather?.clouds?.all ?? 0) + "%"
+        visibility.text = String(weather?.visibility ?? 0)
+        humidity.text = String(weather?.main?.humidity ?? 0) + "%"
+        seaLevel.text = String(weather?.main?.seaLevel ?? 0) + " hPa"
+        grndLevel.text = String(weather?.main?.grndLevel ?? 0) + " hPa"
+        overView.text = properDesc(desc: weather?.weather?[0].weatherDescription ?? "")
     }
 }

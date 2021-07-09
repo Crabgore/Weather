@@ -8,8 +8,6 @@
 import UIKit
 
 class SettingsViewController: UIViewController {
-    
-    let userDefaults = UserDefaults.standard
     @IBOutlet var temp: UISegmentedControl!
     @IBOutlet var speed: UISegmentedControl!
     @IBOutlet var time: UISegmentedControl!
@@ -24,25 +22,25 @@ class SettingsViewController: UIViewController {
     
     @IBAction func tempAction(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 1 {
-            userDefaults.setValue(1, forKey: TEMP)
+            Settings.temp = 1
         } else {
-            userDefaults.setValue(2, forKey: TEMP)
+            Settings.temp = 2
         }
     }
     
     @IBAction func speedAction(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 1 {
-            userDefaults.setValue(1, forKey: SPEED)
+            Settings.speed = 1
         } else {
-            userDefaults.setValue(2, forKey: SPEED)
+            Settings.speed = 2
         }
     }
     
     @IBAction func timeAction(_ sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 1 {
-            userDefaults.setValue(1, forKey: TIME)
+            Settings.time = 1
         } else {
-            userDefaults.setValue(2, forKey: TIME)
+            Settings.time = 2
         }
     }
     
@@ -56,7 +54,7 @@ class SettingsViewController: UIViewController {
         sView.layer.cornerRadius = 5
         setBtn.layer.cornerRadius = 5
         
-        switch userDefaults.integer(forKey: TEMP) {
+        switch Settings.temp {
         case 1:
             temp.selectedSegmentIndex = 1
         case 2:
@@ -65,7 +63,7 @@ class SettingsViewController: UIViewController {
             print("")
         }
         
-        switch userDefaults.integer(forKey: SPEED) {
+        switch Settings.speed {
         case 1:
             speed.selectedSegmentIndex = 1
         case 2:
@@ -74,7 +72,7 @@ class SettingsViewController: UIViewController {
             print("")
         }
         
-        switch userDefaults.integer(forKey: TIME) {
+        switch Settings.time {
         case 1:
             time.selectedSegmentIndex = 1
         case 2:

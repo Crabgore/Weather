@@ -8,18 +8,16 @@
 import UIKit
 
 class ForecastCollectionViewCell: UICollectionViewCell {
-    
-    let dayTimePeriodFormatter = DateFormatter()
-    let userDefaults = UserDefaults.standard
+    lazy var dateFormatter = DateFormatter()
     
     var weather: WeatherList? {
         didSet {
             let icon = weather?.weather?[0].icon ?? "10d"
-            let url = URL(string: "http://openweathermap.org/img/wn/\(icon)@2x.png")
+            guard let url = URL(string: "http://openweathermap.org/img/wn/\(icon)@2x.png"), let data = try? Data(contentsOf: url) else {
+                return
+            }
             
-            let data = try? Data(contentsOf: url!)
-            myImageView.image = UIImage(data: data!)
-            
+            myImageView.image = UIImage(data: data)
             setTime()
             setTemp()
         }
@@ -85,19 +83,17 @@ class ForecastCollectionViewCell: UICollectionViewCell {
     }
     
     private func setTime() {
-        let timeConfig = userDefaults.integer(forKey: TIME)
-        if timeConfig == 2 {
-            dayTimePeriodFormatter.dateFormat = "dd/MM\nhh:mm"
+        if Settings.time == 2 {
+            dateFormatter.dateFormat = "dd/MM\nhh:mm"
         } else {
-            dayTimePeriodFormatter.dateFormat = "dd/MM\nHH:mm"
+            dateFormatter.dateFormat = "dd/MM\nHH:mm"
         }
         
-        date.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
+        date.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
     }
     
     private func setTemp() {
-        let tempConfig = userDefaults.integer(forKey: TEMP)
-        if tempConfig == 1 {
+        if Settings.temp == 1 {
             let mTemp = ((weather?.main?.temp ?? 0) * 1.8) + 32
             temp.text = String(format: "%.0f", mTemp) + "°"
         } else {

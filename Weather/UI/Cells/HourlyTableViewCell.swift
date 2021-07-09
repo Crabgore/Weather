@@ -8,9 +8,7 @@
 import UIKit
 
 class HourlyTableViewCell: UITableViewCell {
-
-    let dayTimePeriodFormatter = DateFormatter()
-    let userDefaults = UserDefaults.standard
+    lazy var dateFormatter = DateFormatter()
     let inset: CGFloat = 10
     var weather: WeatherList? {
         didSet {
@@ -220,25 +218,23 @@ class HourlyTableViewCell: UITableViewCell {
     }
     
     private func setTime() {
-        let timeConfig = userDefaults.integer(forKey: TIME)
-        if timeConfig == 2 {
-            dayTimePeriodFormatter.dateFormat = "hh:mm"
+        if Settings.time == 2 {
+            dateFormatter.dateFormat = "hh:mm"
         } else {
-            dayTimePeriodFormatter.dateFormat = "HH:mm"
+            dateFormatter.dateFormat = "HH:mm"
         }
         
-        time.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
+        time.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
     }
     
     private func setDate() {
-        dayTimePeriodFormatter.dateFormat = "EE, dd/MM"
-        dayTimePeriodFormatter.locale = Locale(identifier: "ru_RU")
-        date.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
+        dateFormatter.dateFormat = "EE, dd/MM"
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        date.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
     }
     
     private func setTemp() {
-        let tempConfig = userDefaults.integer(forKey: TEMP)
-        if tempConfig == 1 {
+        if Settings.temp == 1 {
             let temp = ((weather?.main?.temp ?? 0) * 1.8) + 32
             let feels = ((weather?.main?.feelsLike ?? 0) * 1.8) + 32
             self.temp.text = String(format: "%.0f", temp) + "°"
@@ -250,18 +246,11 @@ class HourlyTableViewCell: UITableViewCell {
     }
     
     private func setSpeed() {
-        let timeConfig = userDefaults.integer(forKey: SPEED)
-        if timeConfig == 1 {
+        if Settings.speed == 1 {
             let speed = ((weather?.wind?.speed ?? 0) * 18) / 5
             windValue.text = String(format: "%.0f", speed) + " Km/h"
         } else {
             windValue.text = String(format: "%.0f", weather?.wind?.speed ?? 0) + " m/s"
         }
-    }
-}
-
-extension UIView {
-    func addSubviews(_ subviews: UIView...) {
-        subviews.forEach { addSubview($0) }
     }
 }

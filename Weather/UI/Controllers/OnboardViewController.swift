@@ -9,8 +9,6 @@ import UIKit
 import CoreLocation
 
 class OnboardViewController: UIViewController, CLLocationManagerDelegate {
-    
-    private let userDefaults = UserDefaults.standard
     private let locationManager = CLLocationManager()
     
     @IBOutlet var titleText: UILabel!
@@ -18,12 +16,12 @@ class OnboardViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet var noBtn: UIButton!
     
     @IBAction func useAction(_ sender: Any) {
-        userDefaults.setValue(false, forKey: IS_PERMITTED)
+        Settings.isPermitted = false
         MyLocationManager.shared.requestWhenInUse(callback: popBack)
     }
     
     @IBAction func noAction(_ sender: Any) {
-        userDefaults.setValue(true, forKey: IS_PERMITTED)
+        Settings.isPermitted = true
         popBack()
     }
     
@@ -43,7 +41,7 @@ class OnboardViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     private func popBack() {
-        userDefaults.set(true, forKey: IS_APP_LAUNCHED_ONCE)
+        Settings.isAppLaunchedOnce = true
         navigationController?.popToRootViewController(animated: true)
     }
 }

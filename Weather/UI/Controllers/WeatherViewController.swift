@@ -8,9 +8,7 @@
 import UIKit
 
 class WeatherViewController: UIViewController {
-    
-    let dayTimePeriodFormatter = DateFormatter()
-    let userDefaults = UserDefaults.standard
+    lazy var dateFormatter = DateFormatter()
     var cityName: String?
     var response: Weather?
     var lists: [WeatherList] = []
@@ -51,11 +49,11 @@ class WeatherViewController: UIViewController {
         back.layer.cornerRadius = 5
         setupViews()
         
-        if cityName == nil {
+        guard let mCityName = cityName else {
             return
-        } else {
-            showInfo(city: cityName)
         }
+        
+        showInfo(city: mCityName)
     }
     
     private func setupViews() {
@@ -69,15 +67,14 @@ class WeatherViewController: UIViewController {
         HourlyDetails.attributedText = attributedString
     }
     
-    private func showInfo(city: String?) {
+    private func showInfo(city: String) {
         addView.isHidden = true
     
-        let cachedWeather = inspector?.getWeather(id: (city?.lowercased())!)
-        if let weather = cachedWeather {
+        if let weather = inspector?.getWeather(id: city.lowercased()) {
             setWeatherInfo(result: weather)
         }
 
-        NetworkService.infoDataTask(city: city!, block: setInfoFromApi)
+        NetworkService.infoDataTask(city: city, block: setInfoFromApi)
     }
     
     @IBAction func addTapped(_ sender: Any) {
@@ -87,7 +84,7 @@ class WeatherViewController: UIViewController {
         }
         let saveAction = UIAlertAction(title: "Сохранить", style: UIAlertAction.Style.default, handler: { alert -> Void in
             let firstTextField = alertController.textFields![0] as UITextField
-            if firstTextField.text != nil && firstTextField.text != "" {
+            if firstTextField.text != nil && !firstTextField.text!.isEmpty {
                 self.cityAdded(city: firstTextField.text!)
             }
         })
@@ -99,22 +96,17 @@ class WeatherViewController: UIViewController {
     
     private func setWeatherInfo(result: Weather) {
         response = result
-        
         changer?.changeTitle(title: result.city?.name ?? "")
+        
         makeList()
-        
         setTemp()
-        desc.text = properDesc(desc: result.list?[0].weather?[0].weatherDescription ?? "")
-        clouds.text = String(result.list?[0].clouds?.all ?? 0) + "%"
-        humidity.text = String(result.list?[0].main?.humidity ?? 0) + "%"
         setSpeed()
-        
         setTime()
-        
+        setTextInfo()
         setupCollection()
         setupTableView()
         
-        inspector?.saveWeather(weather: response!, id: (result.city?.name?.lowercased())!)
+        inspector?.saveWeather(response: response, cityId: result.city?.name?.lowercased())
     }
     
     private func setInfoFromApi(json: Data) {
@@ -130,13 +122,15 @@ class WeatherViewController: UIViewController {
     private func makeList() {
         lists.removeAll()
         
-        lists.append((response?.list?[0])!)
-        for i in 0..<response!.list!.count {
-            let date = response?.list?[i].dtTxt ?? ""
-            print("date: \(date)")
+        guard let list = response?.list else {
+            return
+        }
+        
+        lists.append(list[0])
+        for i in 0..<list.count {
+            let date = list[i].dtTxt ?? ""
             if date.contains("00:00:00") {
-                lists.append((response?.list?[i])!)
-                print("added to lists. date: \(date)")
+                lists.append(list[i])
             }
         }
     }
@@ -161,24 +155,22 @@ class WeatherViewController: UIViewController {
     }
     
     private func setTime() {
-        let timeConfig = userDefaults.integer(forKey: TIME)
-        if timeConfig == 2 {
-            dayTimePeriodFormatter.dateFormat = "hh:mm"
+        if Settings.time == 2 {
+            dateFormatter.dateFormat = "hh:mm"
         } else {
-            dayTimePeriodFormatter.dateFormat = "HH:mm"
+            dateFormatter.dateFormat = "HH:mm"
         }
         
-        sunrise.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.city?.sunrise ?? 0)))
-        sunset.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.city?.sunset ?? 0)))
+        sunrise.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(response?.city?.sunrise ?? 0)))
+        sunset.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(response?.city?.sunset ?? 0)))
         
-        dayTimePeriodFormatter.dateFormat = "EE, dd MMMM"
-        dayTimePeriodFormatter.locale = Locale(identifier: "ru_RU")
-        overview.text = dayTimePeriodFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?[0].dt ?? 0)))
+        dateFormatter.dateFormat = "EE, dd MMMM"
+        dateFormatter.locale = Locale(identifier: "ru_RU")
+        overview.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?[0].dt ?? 0)))
     }
     
     private func setSpeed() {
-        let timeConfig = userDefaults.integer(forKey: SPEED)
-        if timeConfig == 1 {
+        if Settings.speed == 1 {
             let speed = ((response?.list?[0].wind?.speed ?? 0) * 18) / 5
             windSpeed.text = String(format: "%.0f", speed) + " Km/h"
         } else {
@@ -187,8 +179,7 @@ class WeatherViewController: UIViewController {
     }
     
     private func setTemp() {
-        let tempConfig = userDefaults.integer(forKey: TEMP)
-        if tempConfig == 1 {
+        if Settings.temp == 1 {
             let minTemp = ((response?.list?[0].main?.tempMin ?? 0) * 1.8) + 32
             let maxTemp = ((response?.list?[0].main?.tempMax ?? 0) * 1.8) + 32
             let temp = ((response?.list?[0].main?.temp ?? 0) * 1.8) + 32
@@ -208,12 +199,18 @@ class WeatherViewController: UIViewController {
         }
     }
     
+    private func setTextInfo() {
+        desc.text = properDesc(desc: response?.list?[0].weather?[0].weatherDescription ?? "")
+        clouds.text = String(response?.list?[0].clouds?.all ?? 0) + "%"
+        humidity.text = String(response?.list?[0].main?.humidity ?? 0) + "%"
+    }
+    
     private func cityAdded(city: String) {
         NetworkService.infoDataTask(city: city, block: self.setInfoFromApi)
         self.addView.isHidden = true
-        var cities = userDefaults.stringArray(forKey: CITY) ?? [String]()
+        var cities = Settings.city
         cities.append(city)
-        self.userDefaults.setValue(cities, forKey: CITY)
+        Settings.city = cities
     }
     
     func setNewCity(newCityName: String) {
@@ -294,8 +291,4 @@ extension WeatherViewController: UITableViewDelegate {
         (vc as! DetailedViewController).weather = lists[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
     }
-}
-
-protocol TitleChanger {
-    func changeTitle(title: String)
 }

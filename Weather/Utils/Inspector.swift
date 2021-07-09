@@ -13,7 +13,11 @@ class Inspector: RealmInspector {
         return try? Realm()
     }
     
-    func saveWeather(weather: Weather, id: String) {
+    func saveWeather(response: Weather?, cityId: String?) {
+        guard let weather = response, let id = cityId, let weatherList = weather.list else {
+            return
+        }
+        
         let mWeather = CachedWeather()
         mWeather.id = id
         mWeather.cod = weather.cod
@@ -21,55 +25,58 @@ class Inspector: RealmInspector {
         mWeather.cnt.value = weather.cnt
         
         let mList = List<CachedList>()
-        for i in 0..<weather.list!.count {
+        for i in 0..<weatherList.count {
             let list = CachedList()
-            list.dt.value = weather.list![i].dt
+            list.dt.value = weatherList[i].dt
             
             let main = CachedMain()
             main.id = UUID().uuidString
-            main.feelsLike.value = weather.list![i].main?.feelsLike
-            main.grndLevel.value = weather.list![i].main?.grndLevel
-            main.humidity.value = weather.list![i].main?.humidity
-            main.pressure.value = weather.list![i].main?.pressure
-            main.seaLevel.value = weather.list![i].main?.seaLevel
-            main.temp.value = weather.list![i].main?.temp
-            main.tempKf.value = weather.list![i].main?.tempKf
-            main.tempMax.value = weather.list![i].main?.tempMax
-            main.tempMin.value = weather.list![i].main?.tempMin
+            main.feelsLike.value = weatherList[i].main?.feelsLike
+            main.grndLevel.value = weatherList[i].main?.grndLevel
+            main.humidity.value = weatherList[i].main?.humidity
+            main.pressure.value = weatherList[i].main?.pressure
+            main.seaLevel.value = weatherList[i].main?.seaLevel
+            main.temp.value = weatherList[i].main?.temp
+            main.tempKf.value = weatherList[i].main?.tempKf
+            main.tempMax.value = weatherList[i].main?.tempMax
+            main.tempMin.value = weatherList[i].main?.tempMin
             list.main = main
             
             let elements = List<CachedWeatherElement>()
-            for j in 0..<weather.list![i].weather!.count {
-                let element = CachedWeatherElement()
-                element.icon = weather.list![i].weather?[j].icon
-                element.id.value = weather.list![i].weather?[j].id
-                element.main = weather.list![i].weather?[j].main
-                element.weatherDescription = weather.list![i].weather?[j].weatherDescription
-                elements.append(element)
+            if let weatherListElemet = weatherList[i].weather {
+                for j in 0..<weatherListElemet.count {
+                    let element = CachedWeatherElement()
+                    element.icon = weatherListElemet[j].icon
+                    element.id.value = weatherListElemet[j].id
+                    element.main = weatherListElemet[j].main
+                    element.weatherDescription = weatherListElemet[j].weatherDescription
+                    elements.append(element)
+                }
             }
+        
             list.weather = elements
             
             let clouds = CachedClouds()
-            clouds.all.value = weather.list![i].clouds?.all
+            clouds.all.value = weatherList[i].clouds?.all
             list.clouds = clouds
             
             let wind = CachedWind()
-            wind.deg.value = weather.list![i].wind?.deg
-            wind.gust.value = weather.list![i].wind?.gust
-            wind.speed.value = weather.list![i].wind?.speed
+            wind.deg.value = weatherList[i].wind?.deg
+            wind.gust.value = weatherList[i].wind?.gust
+            wind.speed.value = weatherList[i].wind?.speed
             list.wind = wind
             
-            list.visibility.value = weather.list![i].visibility
-            list.pop.value = weather.list![i].pop
+            list.visibility.value = weatherList[i].visibility
+            list.pop.value = weatherList[i].pop
             
             let rain = CachedRain()
-            rain.the3H.value = weather.list![i].rain?.the3H
+            rain.the3H.value = weatherList[i].rain?.the3H
             list.rain = rain
             
             let sys = CachedSys()
-            sys.pod = weather.list![i].sys?.pod
+            sys.pod = weatherList[i].sys?.pod
             list.sys = sys
-            list.dtTxt = weather.list![i].dtTxt
+            list.dtTxt = weatherList[i].dtTxt
             
             mList.append(list)
         }
@@ -97,9 +104,7 @@ class Inspector: RealmInspector {
     }
     
     func getWeather(id: String) -> Weather? {
-        let responseS = realm!.object(ofType: CachedWeather.self, forPrimaryKey: id)
-        
-        if let response = responseS {
+        if let response = realm?.object(ofType: CachedWeather.self, forPrimaryKey: id) {
             let cod = response.cod
             let message = response.message
             let cnt = response.cnt

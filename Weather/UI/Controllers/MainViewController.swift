@@ -10,32 +10,21 @@ import CoreLocation
 
 class MainViewController: UIPageViewController, CLLocationManagerDelegate, TitleChanger  {
     
-    private let userDefaults = UserDefaults.standard
     private let inspector = Inspector()
     private let locationManager = CLLocationManager()
     private(set) lazy var orderedViewControllers: [UIViewController] = {
         var controllers = [UIViewController]()
-        controllers.append(self.newViewController())
+        controllers.append(self.makeNewViewController())
         
-        var cities = userDefaults.stringArray(forKey: CITY) ?? [String]()
+        var cities = Settings.city
         if cities.count > 0 {
             for city in cities {
-                controllers.append(self.newViewController(cityName: city))
+                controllers.append(self.makeNewViewController(cityName: city))
             }
         }
         
         return controllers
     }()
-    
-    private func newViewController(cityName: String? = nil) -> UIViewController {
-        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "WeatherVC")
-        (vc as! WeatherViewController).inspector = self.inspector
-        (vc as! WeatherViewController).changer = self
-        if cityName != nil {
-            (vc as! WeatherViewController).cityName = cityName
-        }
-        return vc
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,15 +44,25 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
         dataSource = self
         
         let locationBtn = UIBarButtonItem(
-            image: UIImage(named: "location")!.withRenderingMode(.alwaysOriginal),
+            image: UIImage(named: "location")?.withRenderingMode(.alwaysOriginal),
             style: .plain, target: self, action: #selector(locationTapped))
         
         let menuBtn = UIBarButtonItem(
-            image: UIImage(named: "menu")!.withRenderingMode(.alwaysOriginal),
+            image: UIImage(named: "menu")?.withRenderingMode(.alwaysOriginal),
             style: .plain, target: self, action: #selector(menuTapped))
         
         navigationItem.leftBarButtonItem = menuBtn
         navigationItem.rightBarButtonItem = locationBtn
+    }
+    
+    private func makeNewViewController(cityName: String? = nil) -> UIViewController {
+        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "WeatherVC")
+        (vc as! WeatherViewController).inspector = self.inspector
+        (vc as! WeatherViewController).changer = self
+        if cityName != nil {
+            (vc as! WeatherViewController).cityName = cityName
+        }
+        return vc
     }
     
     private func checkPermission() {
@@ -71,7 +70,7 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
         case .authorizedAlways, .authorizedWhenInUse:
             locationManager.requestLocation()
         case .notDetermined:
-            let permission = userDefaults.bool(forKey: IS_PERMITTED)
+            let permission = Settings.isPermitted
             if permission {
                 if let firstViewController = self.orderedViewControllers.first {
                     self.setViewControllers([firstViewController], direction: .forward, animated: true, completion: nil)
@@ -118,15 +117,19 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
         self.navigationItem.title = title
     }
     
+    private func appendNewController() {
+        orderedViewControllers.append(makeNewViewController())
+    }
+    
     @objc private func locationTapped() {
         let alertController = UIAlertController(title: "Введите название города на английском", message: "", preferredStyle: UIAlertController.Style.alert)
-        alertController.addTextField { (textField : UITextField!) -> Void in
+        alertController.addTextField { (textField : UITextField) -> Void in
             textField.placeholder = "Введите название города на английском"
         }
         let saveAction = UIAlertAction(title: "Сохранить", style: UIAlertAction.Style.default, handler: { alert -> Void in
             let firstTextField = alertController.textFields![0] as UITextField
-            if firstTextField.text != nil && firstTextField.text != "" {
-                self.orderedViewControllers.append(self.newViewController())
+            if firstTextField.text != nil && !firstTextField.text!.isEmpty {
+                self.appendNewController()
                 if let firstViewController = self.orderedViewControllers.last {
                     self.setViewControllers([firstViewController],
                                             direction: .forward,
@@ -147,10 +150,10 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
     }
     
     func isAppAlreadyLaunchedOnce() -> Bool {
-        if userDefaults.bool(forKey: IS_APP_LAUNCHED_ONCE) == false {
+        if Settings.isAppLaunchedOnce == false {
                 return true
             } else {
-                userDefaults.set(false, forKey: IS_APP_LAUNCHED_ONCE)
+                Settings.isAppLaunchedOnce = false
                 return false
             }
         }
@@ -231,9 +234,4 @@ extension CLLocationManager {
             completion(placemark)
         }
     }
-}
-
-protocol RealmInspector {
-    func saveWeather(weather: Weather, id: String)
-    func getWeather(id: String) -> Weather?
 }
