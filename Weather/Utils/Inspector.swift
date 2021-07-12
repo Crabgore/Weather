@@ -25,31 +25,31 @@ class Inspector: RealmInspector {
         mWeather.cnt.value = weather.cnt
         
         let mList = List<CachedList>()
-        for i in 0..<weatherList.count {
+        weatherList.forEach { item in
             let list = CachedList()
-            list.dt.value = weatherList[i].dt
+            list.dt.value = item.dt
             
             let main = CachedMain()
             main.id = UUID().uuidString
-            main.feelsLike.value = weatherList[i].main?.feelsLike
-            main.grndLevel.value = weatherList[i].main?.grndLevel
-            main.humidity.value = weatherList[i].main?.humidity
-            main.pressure.value = weatherList[i].main?.pressure
-            main.seaLevel.value = weatherList[i].main?.seaLevel
-            main.temp.value = weatherList[i].main?.temp
-            main.tempKf.value = weatherList[i].main?.tempKf
-            main.tempMax.value = weatherList[i].main?.tempMax
-            main.tempMin.value = weatherList[i].main?.tempMin
+            main.feelsLike.value = item.main?.feelsLike
+            main.grndLevel.value = item.main?.grndLevel
+            main.humidity.value = item.main?.humidity
+            main.pressure.value = item.main?.pressure
+            main.seaLevel.value = item.main?.seaLevel
+            main.temp.value = item.main?.temp
+            main.tempKf.value = item.main?.tempKf
+            main.tempMax.value = item.main?.tempMax
+            main.tempMin.value = item.main?.tempMin
             list.main = main
             
             let elements = List<CachedWeatherElement>()
-            if let weatherListElemet = weatherList[i].weather {
-                for j in 0..<weatherListElemet.count {
+            if let weatherListElemet = item.weather {
+                weatherListElemet.forEach { weather in
                     let element = CachedWeatherElement()
-                    element.icon = weatherListElemet[j].icon
-                    element.id.value = weatherListElemet[j].id
-                    element.main = weatherListElemet[j].main
-                    element.weatherDescription = weatherListElemet[j].weatherDescription
+                    element.icon = weather.icon
+                    element.id.value = weather.id
+                    element.main = weather.main
+                    element.weatherDescription = weather.weatherDescription
                     elements.append(element)
                 }
             }
@@ -57,29 +57,30 @@ class Inspector: RealmInspector {
             list.weather = elements
             
             let clouds = CachedClouds()
-            clouds.all.value = weatherList[i].clouds?.all
+            clouds.all.value = item.clouds?.all
             list.clouds = clouds
             
             let wind = CachedWind()
-            wind.deg.value = weatherList[i].wind?.deg
-            wind.gust.value = weatherList[i].wind?.gust
-            wind.speed.value = weatherList[i].wind?.speed
+            wind.deg.value = item.wind?.deg
+            wind.gust.value = item.wind?.gust
+            wind.speed.value = item.wind?.speed
             list.wind = wind
             
-            list.visibility.value = weatherList[i].visibility
-            list.pop.value = weatherList[i].pop
+            list.visibility.value = item.visibility
+            list.pop.value = item.pop
             
             let rain = CachedRain()
-            rain.the3H.value = weatherList[i].rain?.the3H
+            rain.the3H.value = item.rain?.the3H
             list.rain = rain
             
             let sys = CachedSys()
-            sys.pod = weatherList[i].sys?.pod
+            sys.pod = item.sys?.pod
             list.sys = sys
-            list.dtTxt = weatherList[i].dtTxt
+            list.dtTxt = item.dtTxt
             
             mList.append(list)
         }
+    
         mWeather.list = mList
         
         let city = CachedCity()
@@ -112,21 +113,21 @@ class Inspector: RealmInspector {
             let list = response.list
 
             var mList = [WeatherList]()
-            for i in 0..<list.count {
-                let dt = list[i].dt
-                let main = Main(temp: list[i].main?.temp.value, feelsLike: list[i].main?.feelsLike.value, tempMin: list[i].main?.tempMin.value, tempMax: list[i].main?.tempMax.value, pressure: list[i].main?.pressure.value, seaLevel: list[i].main?.pressure.value, grndLevel: list[i].main?.grndLevel.value, humidity: list[i].main?.grndLevel.value, tempKf: list[i].main?.tempKf.value)
+            list.forEach { item in
+                let dt = item.dt
+                let main = Main(temp: item.main?.temp.value, feelsLike: item.main?.feelsLike.value, tempMin: item.main?.tempMin.value, tempMax: item.main?.tempMax.value, pressure: item.main?.pressure.value, seaLevel: item.main?.pressure.value, grndLevel: item.main?.grndLevel.value, humidity: item.main?.grndLevel.value, tempKf: item.main?.tempKf.value)
                 var elements = [WeatherElement]()
-                for j in 0..<list[i].weather.count {
-                    let element = WeatherElement(id: list[i].weather[j].id.value, main: list[i].weather[j].main, weatherDescription: list[i].weather[j].weatherDescription, icon: list[i].weather[j].icon)
+                item.weather.forEach { weather in
+                    let element = WeatherElement(id: weather.id.value, main: weather.main, weatherDescription: weather.weatherDescription, icon: weather.icon)
                     elements.append(element)
                 }
-                let clouds = Clouds(all: list[i].clouds?.all.value)
-                let wind = Wind(speed: list[i].wind?.speed.value, deg: list[i].wind?.deg.value, gust: list[i].wind?.gust.value)
-                let visibility = list[i].visibility
-                let pop = list[i].pop
-                let rain = Rain(the3H: list[i].rain?.the3H.value)
-                let sys = Sys(pod: list[i].sys?.pod)
-                let dtTxt = list[i].dtTxt
+                let clouds = Clouds(all: item.clouds?.all.value)
+                let wind = Wind(speed: item.wind?.speed.value, deg: item.wind?.deg.value, gust: item.wind?.gust.value)
+                let visibility = item.visibility
+                let pop = item.pop
+                let rain = Rain(the3H: item.rain?.the3H.value)
+                let sys = Sys(pod: item.sys?.pod)
+                let dtTxt = item.dtTxt
                 
                 mList.append(WeatherList(dt: dt.value, main: main, weather: elements, clouds: clouds, wind: wind, visibility: visibility.value, pop: pop.value, rain: rain, sys: sys, dtTxt: dtTxt))
             }
@@ -138,5 +139,4 @@ class Inspector: RealmInspector {
         
         return nil
     }
-
 }

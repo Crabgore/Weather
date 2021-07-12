@@ -12,14 +12,14 @@ class ForecastCollectionViewCell: UICollectionViewCell {
     
     var weather: WeatherList? {
         didSet {
-            let icon = weather?.weather?[0].icon ?? "10d"
+            let icon = weather?.weather?.first?.icon ?? "10d"
             guard let url = URL(string: "http://openweathermap.org/img/wn/\(icon)@2x.png"), let data = try? Data(contentsOf: url) else {
                 return
             }
             
             myImageView.image = UIImage(data: data)
+            temp.text = getProperCurrentTemp(receivedTemp: weather?.main?.temp ?? 0)
             setTime()
-            setTemp()
         }
     }
     
@@ -90,14 +90,5 @@ class ForecastCollectionViewCell: UICollectionViewCell {
         }
         
         date.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
-    }
-    
-    private func setTemp() {
-        if Settings.temp == 1 {
-            let mTemp = ((weather?.main?.temp ?? 0) * 1.8) + 32
-            temp.text = String(format: "%.0f", mTemp) + "°"
-        } else {
-            temp.text = String(format: "%.0f", weather?.main?.temp ?? 0) + "°"
-        }
     }
 }

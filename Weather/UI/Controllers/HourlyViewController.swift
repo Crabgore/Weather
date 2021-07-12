@@ -8,8 +8,15 @@
 import UIKit
 
 class HourlyViewController: UIViewController {
-    lazy var dateFormatter = DateFormatter()
     var list: [WeatherList]?
+    var cityName: String? {
+        didSet {
+            temp.text = cityName
+        }
+    }
+    
+    
+    lazy var dateFormatter = DateFormatter()
     var myList = [WeatherList]()
     var previousTemp = 0.0
     var previousRain = 0.0
@@ -18,6 +25,9 @@ class HourlyViewController: UIViewController {
     var myX = 10
     var counter = 0
     var implementer = 10
+    let RAIN = "rain"
+    let TEMP = "temp"
+    
     private let tableView = UITableView(frame: .zero, style: .plain)
     
     private let tempGraphView: UIView = {
@@ -28,33 +38,15 @@ class HourlyViewController: UIViewController {
         return view
     }()
     
-    private let rainGraphView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(rgb: 0xE9EEFA)
-        view.layer.cornerRadius = 5
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
     private let temp: UILabel = {
         let label = UILabel()
         label.numberOfLines = 1
-        label.text = "График температуры"
         label.textAlignment = .left
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    private let rain: UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 1
-        label.text = "График вероятности осадков"
-        label.textAlignment = .left
-        label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,7 +71,7 @@ class HourlyViewController: UIViewController {
 
     private func setupViews() {
         view.backgroundColor = .white
-        view.addSubviews(temp, tempGraphView, rain, rainGraphView, tableView)
+        view.addSubviews(temp, tempGraphView, tableView)
         counter = Int((view.viewWidth - 10) / 9)
         
         let constraints = [
@@ -89,17 +81,9 @@ class HourlyViewController: UIViewController {
             tempGraphView.topAnchor.constraint(equalTo: temp.bottomAnchor, constant: 5),
             tempGraphView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
             tempGraphView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
-            tempGraphView.heightAnchor.constraint(equalToConstant: 120),
+            tempGraphView.heightAnchor.constraint(equalToConstant: 240),
             
-            rain.topAnchor.constraint(equalTo: tempGraphView.bottomAnchor, constant: 20),
-            rain.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
-            
-            rainGraphView.topAnchor.constraint(equalTo: rain.bottomAnchor, constant: 5),
-            rainGraphView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
-            rainGraphView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
-            rainGraphView.heightAnchor.constraint(equalToConstant: 120),
-            
-            tableView.topAnchor.constraint(equalTo: rainGraphView.bottomAnchor, constant: 20),
+            tableView.topAnchor.constraint(equalTo: tempGraphView.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -5)
@@ -111,6 +95,8 @@ class HourlyViewController: UIViewController {
     private func makeList() {
         myList.removeAll()
         
+        
+        //путём экспериментов выявлено, что такое количество точек оптимально для всех экранов
         for i in 0...8 {
             if let item = list?[i] {
                 myList.append(item)
@@ -124,13 +110,14 @@ class HourlyViewController: UIViewController {
         
         path.move(to: point)
         
-        if let temp = myList[0].main?.temp {
+        if let temp = myList.first?.main?.temp {
             addTempPoint(point: point, temp: temp)
         }
-        if let time = myList[0].dt {
+        if let time = myList.first?.dt {
             setTime(x: Int(point.x), view: tempGraphView, time: time)
         }
         
+        //здесь необходимо начинать отсчёт со второго элемента
         for i in 1..<myList.count {
             if let temp = myList[i].main?.temp, let time = myList[i].dt {
                 path.addLine(to: makeDot(x: myX, temp: temp, time: time))
@@ -150,19 +137,18 @@ class HourlyViewController: UIViewController {
     
     private func makeRainGraph() {
         let path = UIBezierPath()
-        let point = CGPoint(x: 10, y: 50)
-        let rain = myList[0].pop ?? 0
+        let point = CGPoint(x: 10, y: 170)
+        let rain = myList.first?.pop ?? 0
+        let icon = myList.first?.weather?.first?.icon ?? "10d"
         
         path.move(to: point)
         
-        addRainPoint(point: point, rain: rain)
-        if let time = myList[0].dt {
-            setTime(x: Int(point.x), view: tempGraphView, time: time)
-        }
+        addRainPoint(point: point, rain: rain, icon: icon)
         
+        //здесь необходимо начинать отсчёт со второго элемента
         for i in 1..<myList.count {
             if let time = myList[i].dt {
-                path.addLine(to: makeRainDot(x: myX, rain: myList[i].pop ?? 0, time: time))
+                path.addLine(to: makeRainDot(x: myX, rain: myList[i].pop ?? 0, time: time, icon: icon))
             }
         }
         
@@ -172,7 +158,7 @@ class HourlyViewController: UIViewController {
         shapeLayer.fillColor = UIColor.clear.cgColor
         shapeLayer.lineWidth = 1
 
-        rainGraphView.layer.addSublayer(shapeLayer)
+        tempGraphView.layer.addSublayer(shapeLayer)
     }
     
     private func makeDot(x: Int, temp: Double, time: CLong) -> CGPoint {
@@ -191,7 +177,7 @@ class HourlyViewController: UIViewController {
         return result
     }
     
-    private func makeRainDot(x: Int, rain: Double, time: CLong) -> CGPoint {
+    private func makeRainDot(x: Int, rain: Double, time: CLong, icon: String) -> CGPoint {
         var result = CGPoint(x: 0, y: 0)
         if rain > previousRain {
             let y = Int(Double(Int(previousRainPoint.y)) - ((rain - previousRain) * 10))
@@ -201,8 +187,7 @@ class HourlyViewController: UIViewController {
             result = CGPoint(x: x, y: y)
         }
         
-        addRainPoint(point: result, rain: rain)
-        setTime(x: Int(result.x), view: rainGraphView, time: time)
+        addRainPoint(point: result, rain: rain, icon: icon)
         
         return result
     }
@@ -215,13 +200,13 @@ class HourlyViewController: UIViewController {
         let label = UILabel()
         label.text = String(Int(temp)) + "°"
         label.font = UIFont.systemFont(ofSize: 14)
-        label.frame = CGRect(x: point.x, y: point.y, width: 30, height: 25)
+        label.frame = CGRect(x: point.x, y: point.y - 25, width: 30, height: 25)
         tempGraphView.addSubview(label)
         
-        addDotToGraph(point: point, view: tempGraphView)
+        addDotToGraph(point: point, type: TEMP)
     }
     
-    private func addRainPoint(point: CGPoint, rain: Double) {
+    private func addRainPoint(point: CGPoint, rain: Double, icon: String) {
         previousRainPoint = point
         previousRain = rain
         myX += counter
@@ -229,18 +214,32 @@ class HourlyViewController: UIViewController {
         let label = UILabel()
         label.text = String(format: "%.0f", rain * 100) + "%"
         label.font = UIFont.systemFont(ofSize: 14)
-        label.frame = CGRect(x: point.x, y: point.y, width: 50, height: 25)
-        rainGraphView.addSubview(label)
+        label.frame = CGRect(x: point.x - 10, y: point.y - 30, width: 50, height: 25)
+        tempGraphView.addSubview(label)
         
-        addDotToGraph(point: point, view: rainGraphView)
+        guard let url = URL(string: "http://openweathermap.org/img/wn/\(icon)@2x.png"), let data = try? Data(contentsOf: url) else {
+            return
+        }
+        
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.frame = CGRect(x: point.x - 10, y: point.y - 50, width: 25, height: 25)
+        imageView.image = UIImage(data: data)
+        tempGraphView.addSubview(imageView)
+        
+        addDotToGraph(point: point, type: RAIN)
     }
     
-    private func addDotToGraph(point: CGPoint, view: UIView) {
+    private func addDotToGraph(point: CGPoint, type: String) {
         let firstDotView = UIView()
-        firstDotView.frame = CGRect(x: point.x-5, y: point.y-5, width: 10, height: 10)
+        if type == TEMP {
+            firstDotView.frame = CGRect(x: point.x-5, y: point.y-5, width: 10, height: 10)
+            firstDotView.layer.cornerRadius = 10
+        } else {
+            firstDotView.frame = CGRect(x: point.x-3, y: point.y-5, width: 5, height: 10)
+        }
         firstDotView.backgroundColor = .blue
-        firstDotView.layer.cornerRadius = 10
-        view.addSubview(firstDotView)
+        tempGraphView.addSubview(firstDotView)
     }
     
     private func setTime(x: Int, view: UIView, time: CLong) {
@@ -251,9 +250,9 @@ class HourlyViewController: UIViewController {
         }
         
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 9)
+        label.font = UIFont.systemFont(ofSize: 10)
         label.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(time)))
-        label.frame = CGRect(x: x, y: 120, width: 30, height: 25)
+        label.frame = CGRect(x: x - 5, y: 220, width: 30, height: 25)
         view.addSubview(label)
     }
     

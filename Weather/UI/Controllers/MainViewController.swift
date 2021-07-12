@@ -17,7 +17,7 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
         controllers.append(self.makeNewViewController())
         
         var cities = Settings.city
-        if cities.count > 0 {
+        if !cities.isEmpty {
             for city in cities {
                 controllers.append(self.makeNewViewController(cityName: city))
             }
@@ -127,7 +127,7 @@ class MainViewController: UIPageViewController, CLLocationManagerDelegate, Title
             textField.placeholder = "Введите название города на английском"
         }
         let saveAction = UIAlertAction(title: "Сохранить", style: UIAlertAction.Style.default, handler: { alert -> Void in
-            let firstTextField = alertController.textFields![0] as UITextField
+            let firstTextField = alertController.textFields!.first! as UITextField
             if firstTextField.text != nil && !firstTextField.text!.isEmpty {
                 self.appendNewController()
                 if let firstViewController = self.orderedViewControllers.last {
@@ -225,7 +225,7 @@ extension CLLocationManager {
                 return
             }
             
-            guard let placemark = placemarks?[0] else {
+            guard let placemark = placemarks?.first else {
                 print("*** Error in \(#function): placemark is nil")
                 completion(nil)
                 return

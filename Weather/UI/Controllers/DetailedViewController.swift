@@ -43,8 +43,7 @@ class DetailedViewController: UIViewController {
         cityName.text = city?.name
         setTime()
         setImage()
-        setTemp(temperature: weather?.main?.temp ?? 0, view: temp)
-        setTemp(temperature: weather?.main?.feelsLike ?? 0, view: feelsLike)
+        setTemp(currentTemp: weather?.main?.temp ?? 0, feelsLikeTemp: weather?.main?.feelsLike ?? 0)
         setSpeed()
         setTextInfo()
     }
@@ -64,7 +63,7 @@ class DetailedViewController: UIViewController {
     }
     
     private func setImage() {
-        let icon = weather?.weather?[0].icon ?? "10d"
+        let icon = weather?.weather?.first?.icon ?? "10d"
         guard let url = URL(string: "http://openweathermap.org/img/wn/\(icon)@2x.png") else {
             return
         }
@@ -74,13 +73,9 @@ class DetailedViewController: UIViewController {
         weatherImage.image = UIImage(data: data)
     }
     
-    private func setTemp(temperature: Double, view: UILabel) {
-        if Settings.temp == 1 {
-            let mTemp = (temperature * 1.8) + 32
-            view.text = String(format: "%.0f", mTemp) + "°"
-        } else {
-            view.text = String(format: "%.0f", temperature) + "°"
-        }
+    private func setTemp(currentTemp: Double, feelsLikeTemp: Double) {
+        temp.text = getProperCurrentTemp(receivedTemp: currentTemp)
+        feelsLike.text = getProperCurrentTemp(receivedTemp: feelsLikeTemp)
     }
     
     private func setSpeed() {
@@ -99,6 +94,6 @@ class DetailedViewController: UIViewController {
         humidity.text = String(weather?.main?.humidity ?? 0) + "%"
         seaLevel.text = String(weather?.main?.seaLevel ?? 0) + " hPa"
         grndLevel.text = String(weather?.main?.grndLevel ?? 0) + " hPa"
-        overView.text = properDesc(desc: weather?.weather?[0].weatherDescription ?? "")
+        overView.text = getProperDesc(desc: weather?.weather?.first?.weatherDescription ?? "")
     }
 }

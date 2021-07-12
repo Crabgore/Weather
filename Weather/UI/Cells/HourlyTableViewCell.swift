@@ -234,15 +234,8 @@ class HourlyTableViewCell: UITableViewCell {
     }
     
     private func setTemp() {
-        if Settings.temp == 1 {
-            let temp = ((weather?.main?.temp ?? 0) * 1.8) + 32
-            let feels = ((weather?.main?.feelsLike ?? 0) * 1.8) + 32
-            self.temp.text = String(format: "%.0f", temp) + "°"
-            feelsLikeValue.text = String(format: "%.0f", feels) + "°"
-        } else {
-            temp.text = String(format: "%.0f", weather?.main?.temp ?? 0) + "°"
-            feelsLikeValue.text = String(format: "%.0f", weather?.main?.feelsLike ?? 0) + "°"
-        }
+        temp.text = getProperCurrentTemp(receivedTemp: weather?.main?.temp ?? 0)
+        feelsLike.text = getProperCurrentTemp(receivedTemp: weather?.main?.feelsLike ?? 0)
     }
     
     private func setSpeed() {

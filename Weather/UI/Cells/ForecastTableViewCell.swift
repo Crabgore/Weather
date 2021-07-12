@@ -15,8 +15,8 @@ class ForecastTableViewCell: UITableViewCell {
             dateFormatter.dateFormat = "dd/MM"
             date.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(weather?.dt ?? 0)))
             rainPossibility.text = String(format: "%.0f", (weather?.pop ?? 0) * 100) + "%"
-            overview.text = properDesc(desc: weather?.weather?[0].weatherDescription ?? "")
-            setTemp()
+            overview.text = getProperDesc(desc: weather?.weather?.first?.weatherDescription ?? "")
+            temp.text = getProperMinMaxTemp(receivedMinTemp: weather?.main?.tempMin ?? 0, receivedMaxTemp: weather?.main?.tempMax ?? 0)
         }
     }
     
@@ -111,23 +111,5 @@ class ForecastTableViewCell: UITableViewCell {
         ]
         
         NSLayoutConstraint.activate(constraints)
-    }
-    
-    private func setTemp() {
-        if Settings.temp == 1 {
-            let minTemp = ((weather?.main?.tempMin ?? 0) * 1.8) + 32
-            let maxTemp = ((weather?.main?.tempMax ?? 0) * 1.8) + 32
-            if String(format: "%.0f", minTemp) == String(format: "%.0f", maxTemp) {
-                temp.text = String(format: "%.0f", minTemp) + "°"
-            } else {
-                temp.text = String(format: "%.0f", minTemp) + "°-" + String(format: "%.0f", maxTemp) + "°"
-            }
-        } else {
-            if String(format: "%.0f", weather?.main?.tempMin ?? 0) == String(format: "%.0f", weather?.main?.tempMax ?? 0) {
-                temp.text = String(format: "%.0f", weather?.main?.tempMin ?? 0) + "°"
-            } else {
-                temp.text = String(format: "%.0f", weather?.main?.tempMin ?? 0) + "°-" + String(format: "%.0f", weather?.main?.tempMax ?? 0) + "°"
-            }
-        }
     }
 }

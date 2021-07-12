@@ -83,7 +83,7 @@ class WeatherViewController: UIViewController {
             textField.placeholder = "Введите название города на английском"
         }
         let saveAction = UIAlertAction(title: "Сохранить", style: UIAlertAction.Style.default, handler: { alert -> Void in
-            let firstTextField = alertController.textFields![0] as UITextField
+            let firstTextField = alertController.textFields!.first! as UITextField
             if firstTextField.text != nil && !firstTextField.text!.isEmpty {
                 self.cityAdded(city: firstTextField.text!)
             }
@@ -122,15 +122,15 @@ class WeatherViewController: UIViewController {
     private func makeList() {
         lists.removeAll()
         
-        guard let list = response?.list else {
+        guard let list = response?.list, let firstDateInList = list.first else {
             return
         }
         
-        lists.append(list[0])
-        for i in 0..<list.count {
-            let date = list[i].dtTxt ?? ""
+        lists.append(firstDateInList)
+        list.forEach {
+            let date = $0.dtTxt ?? ""
             if date.contains("00:00:00") {
-                lists.append(list[i])
+                lists.append($0)
             }
         }
     }
@@ -166,43 +166,27 @@ class WeatherViewController: UIViewController {
         
         dateFormatter.dateFormat = "EE, dd MMMM"
         dateFormatter.locale = Locale(identifier: "ru_RU")
-        overview.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?[0].dt ?? 0)))
+        overview.text = dateFormatter.string(from: Date(timeIntervalSince1970: Double(response?.list?.first?.dt ?? 0)))
     }
     
     private func setSpeed() {
         if Settings.speed == 1 {
-            let speed = ((response?.list?[0].wind?.speed ?? 0) * 18) / 5
+            let speed = ((response?.list?.first?.wind?.speed ?? 0) * 18) / 5
             windSpeed.text = String(format: "%.0f", speed) + " Km/h"
         } else {
-            windSpeed.text = String(format: "%.0f", response?.list?[0].wind?.speed ?? 0) + " m/s"
+            windSpeed.text = String(format: "%.0f", response?.list?.first?.wind?.speed ?? 0) + " m/s"
         }
     }
     
     private func setTemp() {
-        if Settings.temp == 1 {
-            let minTemp = ((response?.list?[0].main?.tempMin ?? 0) * 1.8) + 32
-            let maxTemp = ((response?.list?[0].main?.tempMax ?? 0) * 1.8) + 32
-            let temp = ((response?.list?[0].main?.temp ?? 0) * 1.8) + 32
-            if String(format: "%.0f", minTemp) == String(format: "%.0f", maxTemp) {
-                minMax.text = String(format: "%.0f", minTemp) + "°"
-            } else {
-                minMax.text = String(format: "%.0f", minTemp) + "°/" + String(format: "%.0f", maxTemp) + "°"
-            }
-            currentTemp.text = String(format: "%.0f", temp) + "°"
-        } else {
-            if String(format: "%.0f", response?.list?[0].main?.tempMin ?? 0) == String(format: "%.0f", response?.list?[0].main?.tempMax ?? 0) {
-                minMax.text = String(format: "%.0f", response?.list?[0].main?.tempMin ?? 0) + "°"
-            } else {
-                minMax.text = String(format: "%.0f", response?.list?[0].main?.tempMin ?? 0) + "°/" + String(format: "%.0f", response?.list?[0].main?.tempMax ?? 0) + "°"
-            }
-            currentTemp.text = String(format: "%.0f", response?.list?[0].main?.temp ?? 0) + "°"
-        }
+        currentTemp.text = getProperCurrentTemp(receivedTemp: response?.list?.first?.main?.temp ?? 0)
+        minMax.text = getProperMinMaxTemp(receivedMinTemp: response?.list?.first?.main?.tempMin ?? 0, receivedMaxTemp: response?.list?.first?.main?.tempMax ?? 0)
     }
     
     private func setTextInfo() {
-        desc.text = properDesc(desc: response?.list?[0].weather?[0].weatherDescription ?? "")
-        clouds.text = String(response?.list?[0].clouds?.all ?? 0) + "%"
-        humidity.text = String(response?.list?[0].main?.humidity ?? 0) + "%"
+        desc.text = getProperDesc(desc: response?.list?.first?.weather?.first?.weatherDescription ?? "")
+        clouds.text = String(response?.list?.first?.clouds?.all ?? 0) + "%"
+        humidity.text = String(response?.list?.first?.main?.humidity ?? 0) + "%"
     }
     
     private func cityAdded(city: String) {
@@ -222,6 +206,7 @@ class WeatherViewController: UIViewController {
     @objc private func toHourlyDetails() {
         let vc = HourlyViewController()
         vc.list = response?.list
+        vc.cityName = response?.city?.name ?? ""
         navigationController?.pushViewController(vc, animated: true)
     }
 }
