@@ -28,6 +28,9 @@
 		87208C8C26985929009E17F1 /* TitleChanger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208C8B26985929009E17F1 /* TitleChanger.swift */; };
 		87208C93269C3472009E17F1 /* UtilFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208C92269C3472009E17F1 /* UtilFunctions.swift */; };
 		87208C96269C3487009E17F1 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208C95269C3487009E17F1 /* Extensions.swift */; };
+		87208C9F269D8BB2009E17F1 /* ChartFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208C9E269D8BB2009E17F1 /* ChartFormatter.swift */; };
+		87208CA6269DA92C009E17F1 /* TempLabelFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208CA5269DA92C009E17F1 /* TempLabelFormatter.swift */; };
+		87208CA9269DABF4009E17F1 /* RainLabelFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87208CA8269DABF4009E17F1 /* RainLabelFormatter.swift */; };
 		8776BECB266FB0DD00297943 /* Inspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8776BECA266FB0DD00297943 /* Inspector.swift */; };
 		8776BECE2670D29A00297943 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8776BECD2670D29A00297943 /* SettingsViewController.swift */; };
 		8776BEDA267111D400297943 /* CachedWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8776BED9267111D400297943 /* CachedWeather.swift */; };
@@ -67,6 +70,9 @@
 		87208C8B26985929009E17F1 /* TitleChanger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleChanger.swift; sourceTree = "<group>"; };
 		87208C92269C3472009E17F1 /* UtilFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilFunctions.swift; sourceTree = "<group>"; };
 		87208C95269C3487009E17F1 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		87208C9E269D8BB2009E17F1 /* ChartFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartFormatter.swift; sourceTree = "<group>"; };
+		87208CA5269DA92C009E17F1 /* TempLabelFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempLabelFormatter.swift; sourceTree = "<group>"; };
+		87208CA8269DABF4009E17F1 /* RainLabelFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainLabelFormatter.swift; sourceTree = "<group>"; };
 		8776BECA266FB0DD00297943 /* Inspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inspector.swift; sourceTree = "<group>"; };
 		8776BECD2670D29A00297943 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		8776BED9267111D400297943 /* CachedWeather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedWeather.swift; sourceTree = "<group>"; };
@@ -185,6 +191,9 @@
 				87208C8B26985929009E17F1 /* TitleChanger.swift */,
 				87208C92269C3472009E17F1 /* UtilFunctions.swift */,
 				87208C95269C3487009E17F1 /* Extensions.swift */,
+				87208C9E269D8BB2009E17F1 /* ChartFormatter.swift */,
+				87208CA5269DA92C009E17F1 /* TempLabelFormatter.swift */,
+				87208CA8269DABF4009E17F1 /* RainLabelFormatter.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -337,8 +346,10 @@
 				87208C88269846A1009E17F1 /* Settings.swift in Sources */,
 				871001B1266F9525001200C3 /* OnboardViewController.swift in Sources */,
 				8776BEEB267372CC00297943 /* CachedCoord.swift in Sources */,
+				87208CA9269DABF4009E17F1 /* RainLabelFormatter.swift in Sources */,
 				87208C852698441A009E17F1 /* RealmInspector.swift in Sources */,
 				87208C7C268484BF009E17F1 /* HourlyTableViewCell.swift in Sources */,
+				87208C9F269D8BB2009E17F1 /* ChartFormatter.swift in Sources */,
 				8776BEDA267111D400297943 /* CachedWeather.swift in Sources */,
 				8776BEF42673733300297943 /* CachedClouds.swift in Sources */,
 				8776BECB266FB0DD00297943 /* Inspector.swift in Sources */,
@@ -362,6 +373,7 @@
 				8776BECE2670D29A00297943 /* SettingsViewController.swift in Sources */,
 				8776BEFA2673737700297943 /* CachedRain.swift in Sources */,
 				871001A4266E3D1B001200C3 /* NetworkService.swift in Sources */,
+				87208CA6269DA92C009E17F1 /* TempLabelFormatter.swift in Sources */,
 				87100189266E197A001200C3 /* SceneDelegate.swift in Sources */,
 				8776BEE42673727100297943 /* CachedList.swift in Sources */,
 			);
