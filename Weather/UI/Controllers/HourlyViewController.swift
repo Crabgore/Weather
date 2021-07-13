@@ -92,12 +92,12 @@ class HourlyViewController: UIViewController {
             tempLineChartView.topAnchor.constraint(equalTo: temp.bottomAnchor, constant: 5),
             tempLineChartView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
             tempLineChartView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
-            tempLineChartView.heightAnchor.constraint(equalToConstant: 60),
+            tempLineChartView.heightAnchor.constraint(equalToConstant: 100),
             
             rainLineChartView.topAnchor.constraint(equalTo: tempLineChartView.bottomAnchor),
             rainLineChartView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
             rainLineChartView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -5),
-            rainLineChartView.heightAnchor.constraint(equalToConstant: 60),
+            rainLineChartView.heightAnchor.constraint(equalToConstant: 100),
             
             tableView.topAnchor.constraint(equalTo: rainLineChartView.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 5),
