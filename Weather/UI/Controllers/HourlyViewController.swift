@@ -18,6 +18,7 @@ class HourlyViewController: UIViewController {
     
     var tempChartsList = [ChartDataEntry]()
     var rainChartsList = [ChartDataEntry]()
+    var imagesChartsList = [ChartDataEntry]()
     var myList = [WeatherList]()
     var dateList = [CLong]()
     
@@ -115,6 +116,18 @@ class HourlyViewController: UIViewController {
             if let item = list?[i] {
                 tempChartsList.append(ChartDataEntry(x: count, y: item.main?.temp ?? 0))
                 rainChartsList.append(ChartDataEntry(x: count, y: (item.pop ?? 0) * 100, icon: UIImage(color: UIColor(rgb: 0x204EC7), size: CGSize(width: 1, height: 2))))
+                
+                if item.pop ?? 0 <= 0.25 {
+                    let image = UIImage(named: "sun")
+                    imagesChartsList.append(ChartDataEntry(x: count, y: ((item.pop ?? 0) * 100) + 50, icon: image?.imageResize(sizeChange: CGSize(width: 15, height: 15))))
+                } else if item.pop ?? 0 > 0.25 && item.pop ?? 0 <= 0.75 {
+                    let image = UIImage(named: "cloudness")
+                    imagesChartsList.append(ChartDataEntry(x: count, y: ((item.pop ?? 0) * 100) + 50, icon: image?.imageResize(sizeChange: CGSize(width: 15, height: 15))))
+                } else {
+                    let image = UIImage(named: "rain")
+                    imagesChartsList.append(ChartDataEntry(x: count, y: ((item.pop ?? 0) * 100) + 50, icon: image?.imageResize(sizeChange: CGSize(width: 15, height: 15))))
+                }
+                
                 dateList.append(item.dt ?? 0)
                 myList.append(item)
                 count += 1
@@ -153,6 +166,10 @@ class HourlyViewController: UIViewController {
         set.setColor(UIColor(rgb: 0x204EC7))
         set.drawCirclesEnabled = false
         
+        let imageSet = LineChartDataSet(entries: imagesChartsList)
+        imageSet.drawCirclesEnabled = false
+        imageSet.lineWidth = 0
+        
         let formatter = ChartFormatter()
         formatter.setValues(entries: dateList)
         let xaxis: XAxis = XAxis()
@@ -163,9 +180,11 @@ class HourlyViewController: UIViewController {
         rainLineChartView.legend.enabled = false
         
         let data = LineChartData(dataSet: set)
+        data.addDataSet(imageSet)
         let rainFormatter = RainLabelFormatter()
         data.dataSets.first?.valueFormatter = rainFormatter
         data.dataSets.first?.valueFont = UIFont.systemFont(ofSize: 10)
+        data.dataSets[1].valueFont = UIFont.systemFont(ofSize: 0)
         
         rainLineChartView.data = data
     }
